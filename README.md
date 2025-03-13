@@ -1,4 +1,6 @@
 # Projet PSID
+![image](https://github.com/user-attachments/assets/c32211ad-6224-4abb-869d-255678ac1a4b)
+
 
 [![Build](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml/badge.svg)](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml)
 [![license: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-green)](LICENSE)
@@ -17,7 +19,6 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=AlisonDS_projetPSID&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=AlisonDS_projetPSID)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AlisonDS_projetPSID&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AlisonDS_projetPSID)
 
-![image](https://github.com/user-attachments/assets/1a91fdff-edc1-4214-b5b4-7e8bd1c6e892)
 
 
 
