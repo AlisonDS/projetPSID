@@ -1,5 +1,5 @@
 # Projet PSID
-![image](https://github.com/user-attachments/assets/c32211ad-6224-4abb-869d-255678ac1a4b)
+![image](https://github.com/user-attachments/assets/c32211ad-6224-4abb-869d-255678ac1a4b =300x300)
 
 
 [![Build](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml/badge.svg)](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml)
