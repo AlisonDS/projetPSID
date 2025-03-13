@@ -1,32 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from "react";
+import FootballMap from "./components/FootballMap";
+import RepartitionDomicileExt from "./components/RepartitionDomicileExt";
+import "./App.css";
+import PcaTeamAttributes from "./components/PcaTeamAttributes";
 
 function App() {
-  const [imageSrc, setImageSrc] = useState('');
-
-  useEffect(() => {
-    // Appel de l'API Flask pour récupérer l'image du graphique
-    axios.get('http://localhost:5000/carte_but_league', { responseType: 'arraybuffer' })
-      .then(response => {
-        // Convertir l'image binaire en base64
-        const base64Image = Buffer.from(response.data, 'binary').toString('base64');
-        setImageSrc(`data:image/png;base64,${base64Image}`);
-      })
-      .catch(error => {
-        console.error('Error fetching the chart:', error);
-      });
-  }, []);
-
-  return (
-    <div>
-      <h1>Graphique des buts par pays</h1>
-      {imageSrc ? (
-        <img src={imageSrc} alt="Buts par pays" />
-      ) : (
-        <p>Chargement du graphique...</p>
-      )}
-    </div>
-  );
+    return (
+        <div className="App">
+            <h1>Foot Score - Répartition des Résultats</h1>
+            <RepartitionDomicileExt />
+            <h1>Foot Score - Carte des Buts</h1>
+            <FootballMap />
+            <h1>Foot Score - Cercle des Corrélations PCA</h1>
+            <PcaTeamAttributes />
+        </div>
+    );
 }
 
 export default App;

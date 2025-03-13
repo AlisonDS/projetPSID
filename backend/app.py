@@ -1,4 +1,5 @@
-from flask import Flask, send_file
+from flask import Flask, jsonify
+import json
 from flask_cors import CORS
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ from io import BytesIO
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/')
 def home():
@@ -68,11 +70,21 @@ team_attributes_df = data['Team_Attributes']
 country_df = data['Country']
 league_df = data['League']
 
+# Fonction de conversion récursive
+def convert_ndarray(obj):
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()  # Si c'est un ndarray, on le convertit en liste
+    elif isinstance(obj, dict):
+        return {key: convert_ndarray(value) for key, value in obj.items()}  # Si c'est un dict, on applique la conversion à chaque valeur
+    elif isinstance(obj, list):
+        return [convert_ndarray(item) for item in obj]  # Si c'est une liste, on applique la conversion à chaque élément
+    return obj  # Sinon, on laisse l'objet tel quel
+
 @app.route('/repartition_domicile_ext')
 def repartition_domicile_ext():
     # Créer une colonne indiquant si l'équipe à domicile ou l'équipe à l'extérieur a marqué le plus de buts
     match_df['result'] = match_df.apply(lambda row: 'Home' if row['home_team_goal'] > row['away_team_goal'] 
-                                    else ('Away' if row['home_team_goal'] < row['away_team_goal'] else 'Draw'), axis=1)
+                                        else ('Away' if row['home_team_goal'] < row['away_team_goal'] else 'Draw'), axis=1)
 
     # Compter les occurrences de chaque résultat
     result_counts = match_df['result'].value_counts().reset_index()
@@ -80,43 +92,51 @@ def repartition_domicile_ext():
 
     # Créer le graphique interactif avec Plotly
     fig = px.pie(result_counts, values='Count', names='Result', 
-                title="Répartition des résultats des matchs (domicile, extérieur, égalité)",
-                color_discrete_map={'Home': 'lightgreen', 'Away': 'lightcoral', 'Draw': 'lightblue'})
+                 title="Répartition des résultats des matchs (domicile, extérieur, égalité)",
+                 color_discrete_map={'Home': 'lightgreen', 'Away': 'lightcoral', 'Draw': 'lightblue'})
 
-    # Afficher le graphique
-    fig.show()
+    # Convertir le graphique en dictionnaire et le retourner comme JSON
+    fig_dict = fig.to_dict()  # Conversion en dictionnaire Plotly
+    fig_dict = convert_ndarray(fig_dict)  # Appliquer la conversion des ndarrays en listes
+    return jsonify(fig_dict)
+
 
 @app.route('/carte_but_league')
 def carte_but_league():
     # Charger la carte du monde
     world = gpd.read_file("https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip")
 
-    # Calculer le nombre total de buts par pays
+    # Calcul du nombre total de buts par pays
     match_df['total_goals'] = match_df['home_team_goal'] + match_df['away_team_goal']
     goal_count = match_df.groupby('country_id')['total_goals'].sum().reset_index()
     goal_count.columns = ['country_id', 'goal_count']
 
     # Fusionner avec les noms des pays
     goal_count = goal_count.merge(country_df, left_on='country_id', right_on='id')[['name', 'goal_count']]
+
+    # Correction du nom "England" → "United Kingdom" pour correspondre à la carte
     goal_count.loc[goal_count['name'] == 'England', 'name'] = 'United Kingdom'
 
     # Liste des pays européens à conserver
     european_countries = [
-        'France', 'Germany', 'Italy', 'Spain', 'United Kingdom', 'Netherlands', 'Belgium', 'Portugal',
-        'Switzerland', 'Austria', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic',
-        'Hungary', 'Slovakia', 'Slovenia', 'Croatia', 'Serbia', 'Bosnia and Herzegovina', 'Montenegro',
-        'Albania', 'Greece', 'Romania', 'Bulgaria', 'Ukraine', 'Ireland', 'Iceland', 'Lithuania',
+        'France', 'Germany', 'Italy', 'Spain', 'United Kingdom', 'Netherlands', 'Belgium', 'Portugal', 
+        'Switzerland', 'Austria', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic', 
+        'Hungary', 'Slovakia', 'Slovenia', 'Croatia', 'Serbia', 'Bosnia and Herzegovina', 'Montenegro', 
+        'Albania', 'Greece', 'Romania', 'Bulgaria', 'Ukraine', 'Ireland', 'Iceland', 'Lithuania', 
         'Latvia', 'Estonia'
     ]
 
+    # Filtrer la carte pour afficher uniquement l'Europe
     world = world[world['NAME'].isin(european_countries)]
-    world = world.merge(goal_count, left_on='NAME', right_on='name', how='left')
-    world['goal_count'] = world['goal_count'].fillna(0)
 
-    # Générer la carte avec Plotly
+    # Fusionner les données de buts avec la carte
+    world = world.merge(goal_count, left_on='NAME', right_on='name', how='left')
+    world['goal_count'] = world['goal_count'].fillna(0)  # Remplacer NaN par 0
+
+    # Créer la carte interactive avec Plotly
     fig = px.choropleth(
         world, 
-        geojson=world.geometry, 
+        geojson=world.geometry,  # Assurez-vous que les données GeoJSON sont correctement liées
         locations=world.index, 
         color="goal_count",
         hover_name="NAME",
@@ -126,44 +146,41 @@ def carte_but_league():
         projection="natural earth"
     )
 
-    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_geos(fitbounds="locations", visible=False, projection_type="natural earth", showcoastlines=True)
 
-    # Sauvegarder l'image du graphique
-    img_bytes = fig.to_image(format="png")
-    img_io = BytesIO(img_bytes)
-    img_io.seek(0)
+    # Lorsque tu prépares ta figure Plotly, applique la conversion
+    fig_dict = convert_ndarray(fig.to_dict())
 
-    return send_file(img_io, mimetype='image/png')
+    # Maintenant, retourne fig_dict comme réponse
+    return jsonify(fig_dict)
 
 @app.route('/pca_team_attributes')
 def pca_team_attributes():
     # Étape 1 : Sélectionner les colonnes pertinentes
-    # Exclure les colonnes non numériques ou non pertinentes (comme 'id', 'team_fifa_api_id', 'team_api_id', 'date')
     attributes = team_attributes_df.select_dtypes(include=[np.number]).columns.tolist()
     attributes = [attr for attr in attributes if attr not in ['id', 'team_fifa_api_id', 'team_api_id', 'date', 'buildUpPlaySpeedClass', 'buildUpPlayDribblingClass', 'buildUpPlayPassingClass', 'buildUpPlayPositioningClass', 'chanceCreationPassingClass', 'chanceCreationCrossingClass', 'chanceCreationShootingClass', 'chanceCreationPositioningClass', 'defencePressureClass', 'defenceAggressionClass', 'defenceTeamWidthClass']]
 
     # Extraire les données pertinentes
     X = team_attributes_df[attributes]
 
-    # Gérer les valeurs manquantes (par exemple, remplacer par la médiane)
+    # Gérer les valeurs manquantes (remplacer par la médiane)
     X = X.fillna(X.median())
 
-    # Standardiser les données (moyenne = 0, écart-type = 1)
+    # Standardiser les données
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Étape 2 : Appliquer l'ACP
-    pca = PCA(n_components=2)  # Choisir 2 composantes principales pour la visualisation 2D
+    # Appliquer l'ACP
+    pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_scaled)
 
-    # Étape 3 : Calculer les corrélations entre les variables et les composantes principales
-    # Les composantes principales sont déjà standardisées (car les données ont été standardisées)
+    # Calculer les corrélations entre les variables et les composantes principales
     correlations = np.corrcoef(X_scaled.T, X_pca.T)[:len(attributes), len(attributes):]
 
     # Créer un DataFrame pour les corrélations
     correlations_df = pd.DataFrame(correlations, columns=['PC1', 'PC2'], index=attributes)
 
-    # Étape 4 : Tracer le cercle des corrélations
+    # Créer le graphique
     plt.figure(figsize=(8, 8))
     ax = plt.gca()
 
@@ -177,7 +194,7 @@ def pca_team_attributes():
                 head_width=0.05, head_length=0.05, color='red')
         plt.text(correlations_df.loc[var, 'PC1'] * 1.1, correlations_df.loc[var, 'PC2'] * 1.1, var, color='black')
 
-    # Ajouter des lignes horizontales et verticales pour le centre
+    # Ajouter des lignes horizontales et verticales
     plt.axhline(0, color='gray', linestyle='--')
     plt.axvline(0, color='gray', linestyle='--')
 
@@ -189,7 +206,17 @@ def pca_team_attributes():
     plt.xlabel('Composante Principale 1 (PC1)')
     plt.ylabel('Composante Principale 2 (PC2)')
     plt.title('Cercle des corrélations')
-    plt.show()
+
+    # Sauvegarder l'image dans un buffer en mémoire (au lieu de la sauvegarder sur disque)
+    buf = BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+
+    # Convertir l'image en base64 pour l'envoyer en réponse
+    img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+
+    # Retourner l'image encodée en base64
+    return jsonify({'image': img_base64})
 
 @app.route('/pays_age')
 def pays_age():
