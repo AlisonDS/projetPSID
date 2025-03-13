@@ -38,7 +38,7 @@ Technologies utilisées pour le développement de Foot Score :
 
 # Licence
 
-Ce projet est sous licence https://www.apache.org/licenses/LICENSE-2.0, offrant liberté d'utilisation et de distribution.
+Ce projet est sous licence [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0), offrant liberté d'utilisation et de distribution.
 
 # Auteurs
 
