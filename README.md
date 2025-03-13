@@ -20,5 +20,5 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AlisonDS_projetPSID&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AlisonDS_projetPSID)
 
 
-
-
+# A propos de Foot Score
+Foot Score est une application de prédiction des résultats de matchs de football basée sur le machine learning. Grâce à l'analyse de données historiques et de modèles prédictifs, elle permet d'estimer les scores des rencontres à venir avec précision. 🚀⚽
