@@ -21,3 +21,12 @@
 
 # A propos de Foot Score
 Foot Score est une application de prédiction des résultats de matchs de football basée sur le machine learning. Grâce à l'analyse de données historiques et de modèles prédictifs, elle permet d'estimer les scores des rencontres à venir avec précision. 🚀⚽
+
+# Construit avec
+Technologies utilisées pour le développement de Foot Score :
+Backend : API Flask pour sa performance et Python pour sa lisibilité et facilité de développement.
+
+Frontend : ReactJs pour son architecture et sa réutilisabilité des composants.
+
+
+
