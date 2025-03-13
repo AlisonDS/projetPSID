@@ -39,6 +39,9 @@ Technologies utilisées pour le développement de Foot Score :
 
 # Manuel d'installation et d'utilisation
 
+Pour lancer Foot Score, suivez ces étapes simples :
+
+
 ## Frontend
 
 ```
