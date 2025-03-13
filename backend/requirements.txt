@@ -6,3 +6,5 @@ geopandas
 numpy
 seaborn
 scikit-learn
+flask-cors
+
