@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, send_file
+from flask_cors import CORS
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -8,6 +9,7 @@ import seaborn as sns
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from io import BytesIO
 
 import os
 
@@ -86,7 +88,7 @@ def repartition_domicile_ext():
 
 @app.route('/carte_but_league')
 def carte_but_league():
-    # Charger la carte du monde depuis une source externe
+    # Charger la carte du monde
     world = gpd.read_file("https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip")
 
     # Calculer le nombre total de buts par pays
@@ -96,27 +98,22 @@ def carte_but_league():
 
     # Fusionner avec les noms des pays
     goal_count = goal_count.merge(country_df, left_on='country_id', right_on='id')[['name', 'goal_count']]
-
-    # Correction du nom "England" → "United Kingdom" pour correspondre à la carte
     goal_count.loc[goal_count['name'] == 'England', 'name'] = 'United Kingdom'
 
     # Liste des pays européens à conserver
     european_countries = [
-        'France', 'Germany', 'Italy', 'Spain', 'United Kingdom', 'Netherlands', 'Belgium', 'Portugal', 
-        'Switzerland', 'Austria', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic', 
-        'Hungary', 'Slovakia', 'Slovenia', 'Croatia', 'Serbia', 'Bosnia and Herzegovina', 'Montenegro', 
-        'Albania', 'Greece', 'Romania', 'Bulgaria', 'Ukraine', 'Ireland', 'Iceland', 'Lithuania', 
+        'France', 'Germany', 'Italy', 'Spain', 'United Kingdom', 'Netherlands', 'Belgium', 'Portugal',
+        'Switzerland', 'Austria', 'Sweden', 'Norway', 'Denmark', 'Finland', 'Poland', 'Czech Republic',
+        'Hungary', 'Slovakia', 'Slovenia', 'Croatia', 'Serbia', 'Bosnia and Herzegovina', 'Montenegro',
+        'Albania', 'Greece', 'Romania', 'Bulgaria', 'Ukraine', 'Ireland', 'Iceland', 'Lithuania',
         'Latvia', 'Estonia'
     ]
 
-    # Filtrer la carte pour afficher uniquement l'Europe
     world = world[world['NAME'].isin(european_countries)]
-
-    # Fusionner les données de buts avec la carte
     world = world.merge(goal_count, left_on='NAME', right_on='name', how='left')
-    world['goal_count'] = world['goal_count'].fillna(0)  # Remplacer NaN par 0
+    world['goal_count'] = world['goal_count'].fillna(0)
 
-    # Créer la carte interactive avec Plotly
+    # Générer la carte avec Plotly
     fig = px.choropleth(
         world, 
         geojson=world.geometry, 
@@ -130,9 +127,13 @@ def carte_but_league():
     )
 
     fig.update_geos(fitbounds="locations", visible=False)
-    fig.show()
 
-    return fig
+    # Sauvegarder l'image du graphique
+    img_bytes = fig.to_image(format="png")
+    img_io = BytesIO(img_bytes)
+    img_io.seek(0)
+
+    return send_file(img_io, mimetype='image/png')
 
 @app.route('/pca_team_attributes')
 def pca_team_attributes():
