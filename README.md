@@ -32,5 +32,9 @@ Technologies utilisées pour le développement de Foot Score :
 
 - Frontend : ReactJs pour son architecture et sa réutilisabilité des composants.
 
+# Auteurs
 
+- Alison DOS SANTOS
+- Maxim FARAJ
+- Amel BERRAZOUANE
 
