@@ -26,7 +26,8 @@ Foot Score est une application de prédiction des résultats de matchs de footba
 Technologies utilisées pour le développement de Foot Score :
 
 - Backend : API Flask pour sa performance et Python pour sa lisibilité et facilité de développement.
-![Python](https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg)
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 
 - Frontend : ReactJs pour son architecture et sa réutilisabilité des composants.
 
