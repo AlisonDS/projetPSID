@@ -1,6 +1,5 @@
 # Projet PSID
-![image](https://github.com/user-attachments/assets/c32211ad-6224-4abb-869d-255678ac1a4b)
-
+![image](https://github.com/user-attachments/assets/4b0973b3-1599-453d-871e-cd162cc6452f)
 
 [![Build](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml/badge.svg)](https://github.com/AlisonDS/projetPSID/actions/workflows/python-app.yml)
 [![license: Apache 2.0](https://img.shields.io/badge/license-Apache_2.0-green)](LICENSE)
