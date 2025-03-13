@@ -28,9 +28,13 @@ Technologies utilisées pour le développement de Foot Score :
 - Backend : API Flask pour sa performance et Python pour sa lisibilité et facilité de développement.
   
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)
 
 
 - Frontend : ReactJs pour son architecture et sa réutilisabilité des composants.
+
+![ReactJS](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+
 
 # Auteurs
 
