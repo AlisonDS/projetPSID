@@ -17,5 +17,7 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=AlisonDS_projetPSID&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=AlisonDS_projetPSID)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=AlisonDS_projetPSID&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=AlisonDS_projetPSID)
 
+![image](https://github.com/user-attachments/assets/1a91fdff-edc1-4214-b5b4-7e8bd1c6e892)
+
 
 
