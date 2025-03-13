@@ -36,6 +36,27 @@ Technologies utilisées pour le développement de Foot Score :
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
+
+# Manuel d'installation et d'utilisation
+
+## Frontend
+
+```
+git clone https://github.com/AlisonDS/projetPSID.git
+cd projetPSID
+npm install
+npm start
+```
+
+## Backend
+
+```
+pip install -r requirements.txt
+python app.py
+```
+
+Ouvrez http://localhost:3000/ pour accéder au frontend React et http://localhost:5000/ pour le backend Flask.
+
 # Licence
 
 Ce projet est sous licence [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0), offrant liberté d'utilisation et de distribution.
