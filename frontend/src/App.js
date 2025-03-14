@@ -50,7 +50,7 @@ function App() {
                     <h1>📊 Projet Football Data - Prédiction des Scores</h1>
 
                     <section>
-                        <h2>⚽ Contexte</h2>
+                        <h2> Contexte</h2>
                         <p>
                             Le football est l'un des sports les plus suivis au monde, et la prédiction des résultats 
                             des matchs est un défi passionnant qui combine statistiques, analyse de données et 
@@ -68,10 +68,10 @@ function App() {
                             avec précision.
                         </p>
                         <ul>
-                            <li>📌 Collecter et nettoyer les données pour garantir leur fiabilité.</li>
-                            <li>📌 Explorer et visualiser les tendances pour mieux comprendre les performances des équipes.</li>
-                            <li>📌 Développer et tester des modèles prédictifs pour estimer les scores des matchs.</li>
-                            <li>📌 Proposer des analyses exploitables pour affiner les stratégies de pronostics.</li>
+                            <li>Collecter et nettoyer les données pour garantir leur fiabilité.</li>
+                            <li>Explorer et visualiser les tendances pour mieux comprendre les performances des équipes.</li>
+                            <li>Développer et tester des modèles prédictifs pour estimer les scores des matchs.</li>
+                            <li>Proposer des analyses exploitables pour affiner les stratégies de pronostics.</li>
                         </ul>
                     </section>
 
@@ -81,13 +81,13 @@ function App() {
                             Pour répondre à ces objectifs, le projet suit plusieurs étapes clés :
                         </p>
                         <ol>
-                            <li>📂 <strong>Exploration et préparation des données :</strong> Sélectionner les données pertinentes 
+                            <li><strong>Exploration et préparation des données :</strong> Sélectionner les données pertinentes 
                             (scores passés, statistiques des équipes, performances des joueurs, etc.) et assurer leur qualité.</li>
-                            <li>📊 <strong>Analyse des données :</strong> Identifier les tendances, les facteurs clés influençant 
+                            <li><strong>Analyse des données :</strong> Identifier les tendances, les facteurs clés influençant 
                             les résultats et établir des visualisations claires.</li>
-                            <li>🤖 <strong>Modélisation prédictive :</strong> Utiliser des algorithmes de machine learning 
+                            <li><strong>Modélisation prédictive :</strong> Utiliser des algorithmes de machine learning 
                             pour prédire les scores des matchs.</li>
-                            <li>📈 <strong>Interprétation des résultats :</strong> Traduire les prédictions en recommandations 
+                            <li><strong>Interprétation des résultats :</strong> Traduire les prédictions en recommandations 
                             exploitables pour améliorer la compréhension des performances des équipes.</li>
                         </ol>
                     </section>
@@ -98,10 +98,10 @@ function App() {
                         Les données exploitées pour ce projet proviennent de la base de données disponible sur Kaggle, couvrant la saison 2008-2016. Ce jeu de données contient des informations détaillées sur les joueurs et les performances des équipes :
                         </p>
                         <ul>
-                            <li>📌 Statistiques individuelles des joueurs (buts, passes, minutes jouées, etc.).</li>
-                            <li>📌Données avancées sur les métriques physiques et tactiques, incluant des informations provenant de la série de jeux vidéo FIFA d'EA Sports avec des mises à jour hebdomadaires.</li>
-                            <li>📌 Résultats des matchs et performances collectives.</li>
-                            <li>📌 Données avancées sur les métriques physiques et tactiques.
+                            <li>Statistiques individuelles des joueurs (buts, passes, minutes jouées, etc.).</li>
+                            <li>Données avancées sur les métriques physiques et tactiques, incluant des informations provenant de la série de jeux vidéo FIFA d'EA Sports avec des mises à jour hebdomadaires.</li>
+                            <li> Résultats des matchs et performances collectives.</li>
+                            <li>Données avancées sur les métriques physiques et tactiques.
                             Ces informations sont essentielles pour identifier les facteurs influençant les scores, affiner les modèles prédictifs et mieux comprendre les dynamiques des équipes et des joueurs.</li>
                         </ul>
                         <p>Ces informations sont essentielles pour identifier les facteurs influençant les scores et affiner les modèles prédictifs.</p>
@@ -125,33 +125,33 @@ function App() {
                     <h3>📌 L’avantage du terrain : une tendance marquée</h3>
                     <p>On observe que les victoires à domicile représentent <strong>45,9%</strong> des matchs, ce qui en fait l’issue la plus fréquente. Cette dominance du facteur terrain s’explique par :</p>
                     <ul>
-                        <li>🏟️ <strong>Le soutien du public</strong>, qui booste la motivation des joueurs et peut influencer l’arbitrage.</li>
-                        <li>⚽ <strong>La familiarité avec le terrain</strong>, qui améliore la performance des équipes locales.</li>
-                        <li>🛌 <strong>Moins de fatigue liée aux déplacements</strong>, favorisant une meilleure récupération.</li>
+                        <li> <strong>Le soutien du public</strong>, qui booste la motivation des joueurs et peut influencer l’arbitrage.</li>
+                        <li> <strong>La familiarité avec le terrain</strong>, qui améliore la performance des équipes locales.</li>
+                        <li> <strong>Moins de fatigue liée aux déplacements</strong>, favorisant une meilleure récupération.</li>
                     </ul>
 
                     <h3>📉 Un écart notable avec les victoires à l’extérieur</h3>
                     <p>Les victoires à l’extérieur (<strong>28,8%</strong>) sont bien moins fréquentes que celles à domicile, confirmant la difficulté de jouer en déplacement :</p>
                     <ul>
-                        <li>🎭 <strong>Un environnement hostile</strong> avec un public adverse.</li>
-                        <li>🚍 <strong>Des contraintes logistiques</strong> et de voyage impactant la fatigue.</li>
-                        <li>🛑 <strong>Des stratégies plus défensives</strong> pour limiter les risques.</li>
+                        <li><strong>Un environnement hostile</strong> avec un public adverse.</li>
+                        <li><strong>Des contraintes logistiques</strong> et de voyage impactant la fatigue.</li>
+                        <li><strong>Des stratégies plus défensives</strong> pour limiter les risques.</li>
                     </ul>
 
                     <h3>⚖️ Les matchs nuls : une issue non négligeable</h3>
                     <p>Les matchs nuls (<strong>25,3%</strong>) traduisent une homogénéité entre certaines équipes et des stratégies prudentes :</p>
                     <ul>
-                        <li>📊 Rencontres entre équipes de <strong>niveau similaire</strong>.</li>
-                        <li>🎯 Matchs à enjeu où les équipes <strong>prennent moins de risques</strong>.</li>
-                        <li>🛡️ Styles de jeu défensifs favorisant les égalités.</li>
+                        <li> Rencontres entre équipes de <strong>niveau similaire</strong>.</li>
+                        <li> Matchs à enjeu où les équipes <strong>prennent moins de risques</strong>.</li>
+                        <li> Styles de jeu défensifs favorisant les égalités.</li>
                     </ul>
 
                     <h3>📊 Comparaison avec les tendances générales</h3>
                     <p>Dans le football, l’avantage du terrain est une constante, bien que son impact varie selon les championnats :</p>
                     <ul>
-                        <li>🏆 <strong>Qualité des équipes</strong> : Dans certains championnats, les équipes dominantes gagnent aussi bien à domicile qu’à l’extérieur.</li>
-                        <li>✈️ <strong>Évolution des conditions de jeu</strong> : Les infrastructures modernes réduisent progressivement l’impact du facteur domicile.</li>
-                        <li>🎮 <strong>Approches tactiques modernes</strong> : Certaines équipes jouent un pressing haut, minimisant l’influence du terrain.</li>
+                        <li><strong>Qualité des équipes</strong> : Dans certains championnats, les équipes dominantes gagnent aussi bien à domicile qu’à l’extérieur.</li>
+                        <li><strong>Évolution des conditions de jeu</strong> : Les infrastructures modernes réduisent progressivement l’impact du facteur domicile.</li>
+                        <li><strong>Approches tactiques modernes</strong> : Certaines équipes jouent un pressing haut, minimisant l’influence du terrain.</li>
                     </ul>
                     <h3>📝 Conclusion</h3>
                     <p>Ce graphique met en évidence l’importance du <strong>facteur domicile</strong> dans les performances des équipes et souligne la fréquence des <strong>matchs nuls</strong>. Ces tendances sont cruciales pour l’analyse des résultats et la prédiction des scores.</p>
@@ -164,30 +164,30 @@ function App() {
                         Plus une nation est foncée, plus elle a enregistré un nombre élevé de buts sur la période étudiée.
                     </p>
 
-                    <h3>⚽ Une répartition inégale des buts en Europe</h3>
+                    <h3> Une répartition inégale des buts en Europe</h3>
                     <p>
                         On constate que certains pays dépassent 8000 buts, tandis que d’autres se situent entre 6000 et 8000 buts, 
                         et certains affichent 0 buts (car ces pays ne sont pas présents sur notre dataset). Ces écarts reflètent plusieurs réalités :
                     </p>
                     <ul>
-                        <li>📊 <strong>Le volume de matchs disputés</strong> : Plus un championnat est long et avec beaucoup d’équipes, plus il génère de buts.</li>
-                        <li>⚡ <strong>Le niveau offensif des compétitions</strong> : Certaines ligues favorisent un jeu rapide et ouvert.</li>
-                        <li>🎭 <strong>L’écart de niveau entre les équipes</strong> : Plus une ligue est déséquilibrée, plus les équipes dominantes marquent.</li>
+                        <li> <strong>Le volume de matchs disputés</strong> : Plus un championnat est long et avec beaucoup d’équipes, plus il génère de buts.</li>
+                        <li> <strong>Le niveau offensif des compétitions</strong> : Certaines ligues favorisent un jeu rapide et ouvert.</li>
+                        <li> <strong>L’écart de niveau entre les équipes</strong> : Plus une ligue est déséquilibrée, plus les équipes dominantes marquent.</li>
                     </ul>
 
                     <h3>🌍 Focus sur les pays les plus prolifiques</h3>
                     <p>En observant l’intensité des couleurs sur la carte :</p>
                     <ul>
-                        <li>🔥 <strong>Les nations à +8000 buts</strong> : Angleterre, Espagne... qui affichent les championnats les plus compétitifs.</li>
-                        <li>⚽ <strong>Les pays entre 6000 et 8000 buts</strong> : Ligues dynamiques où les attaquants brillent.</li>
-                        <li>🛡️ <strong>Les pays entre 2000 et 6000 buts</strong> : Ligues plus tactiques et défensives.</li>
+                        <li><strong>Les nations à +8000 buts</strong> : Angleterre, Espagne... qui affichent les championnats les plus compétitifs.</li>
+                        <li> <strong>Les pays entre 6000 et 8000 buts</strong> : Ligues dynamiques où les attaquants brillent.</li>
+                        <li><strong>Les pays entre 2000 et 6000 buts</strong> : Ligues plus tactiques et défensives.</li>
                     </ul>
 
                     <h3>📊 Facteurs expliquant ces écarts</h3>
                     <ul>
-                        <li>🎯 <strong>La présence de grands buteurs</strong> : Certains championnats attirent les meilleurs attaquants mondiaux.</li>
-                        <li>⚔️ <strong>Les stratégies de jeu</strong> : Plus offensif = plus de buts.</li>
-                        <li>📋 <strong>Arbitrage et penalties</strong> : Plus de penalties = plus de buts.</li>
+                        <li> <strong>La présence de grands buteurs</strong> : Certains championnats attirent les meilleurs attaquants mondiaux.</li>
+                        <li><strong>Les stratégies de jeu</strong> : Plus offensif = plus de buts.</li>
+                        <li><strong>Arbitrage et penalties</strong> : Plus de penalties = plus de buts.</li>
                     </ul>
 
                     <h3>🔍 Conclusion</h3>
@@ -206,18 +206,18 @@ function App() {
 
                         <h3>🛡️ Variables liées à la défense (en haut à droite)</h3>
                         <ul>
-                            <li>⚔️ <strong>defencePressure</strong></li>
-                            <li>🏟️ <strong>defenceTeamWidth</strong></li>
-                            <li>🛑 <strong>defenceAggression</strong></li>
+                            <li><strong>defencePressure</strong></li>
+                            <li><strong>defenceTeamWidth</strong></li>
+                            <li><strong>defenceAggression</strong></li>
                         </ul>
                         <p>Ces variables sont fortement corrélées entre elles et influencent principalement la première composante principale (PC1).</p>
 
                         <h3>⚡ Variables liées à la construction du jeu et à la création d’occasions (en bas à droite)</h3>
                         <ul>
-                            <li>⚡ <strong>buildUpPlayPassing</strong></li>
-                            <li>🚀 <strong>buildUpPlaySpeed</strong></li>
-                            <li>🎯 <strong>chanceCreationPassing</strong></li>
-                            <li>🎭 <strong>chanceCreationCrossing</strong></li>
+                            <li> <strong>buildUpPlayPassing</strong></li>
+                            <li> <strong>buildUpPlaySpeed</strong></li>
+                            <li> <strong>chanceCreationPassing</strong></li>
+                            <li> <strong>chanceCreationCrossing</strong></li>
                         </ul>
                         <p>
                             Ces variables sont également fortement corrélées entre elles et influencent significativement PC1. 
@@ -254,25 +254,25 @@ function App() {
                         Toutefois, certaines différences se dégagent :
                     </p>
                     <ul>
-                        <li>🏴 <strong>Angleterre (27 ans)</strong>,  <strong>Italie (27 ans)</strong> et  <strong>France (26 ans)</strong> 
+                        <li> <strong>Angleterre (27 ans)</strong>,  <strong>Italie (27 ans)</strong> et  <strong>France (26 ans)</strong> 
                             affichent des médianes plus élevées, traduisant une présence plus marquée de joueurs expérimentés.</li>
                         <li> <strong>Pays-Bas (24 ans)</strong> et  <strong>Allemagne (25 ans)</strong> montrent une répartition plus large, 
                             avec des jeunes joueurs et des vétérans.</li>
-                        <li>🏴 <strong>Écosse</strong> et  <strong>Espagne</strong> ont une dispersion similaire, avec une répartition bien centrée autour de 25-26 ans.</li>
+                        <li> <strong>Écosse</strong> et  <strong>Espagne</strong> ont une dispersion similaire, avec une répartition bien centrée autour de 25-26 ans.</li>
                     </ul>
 
                     <h3>📌 Présence de joueurs très jeunes et plus âgés</h3>
                     <p>Les points situés au-dessus et en dessous des moustaches indiquent des valeurs atypiques :</p>
                     <ul>
-                        <li>🧑‍🎓 <strong>Les Pays-Bas et l’Écosse</strong> comptent plusieurs jeunes joueurs dès 16-17 ans.</li>
-                        <li>👴 <strong>L’Angleterre, l’Italie et l’Allemagne</strong> possèdent plus de joueurs dépassant 35 ans, certains atteignant 42-43 ans.</li>
+                        <li><strong>Les Pays-Bas et l’Écosse</strong> comptent plusieurs jeunes joueurs dès 16-17 ans.</li>
+                        <li> <strong>L’Angleterre, l’Italie et l’Allemagne</strong> possèdent plus de joueurs dépassant 35 ans, certains atteignant 42-43 ans.</li>
                     </ul>
 
                     <h3>🔍 Explications possibles des différences</h3>
                     <ul>
-                        <li>🏆 <strong>Politiques de formation</strong> : Les Pays-Bas misent sur la jeunesse, tandis que l’Italie et l’Angleterre intègrent plus de vétérans.</li>
-                        <li>⚽ <strong>Styles de jeu et exigences physiques</strong> : Les ligues physiques favorisent des joueurs expérimentés, tandis que d’autres privilégient la vitesse des jeunes.</li>
-                        <li>💰 <strong>Opportunités de transfert</strong> : Certains pays attirent des joueurs en fin de carrière avec des contrats avantageux.</li>
+                        <li> <strong>Politiques de formation</strong> : Les Pays-Bas misent sur la jeunesse, tandis que l’Italie et l’Angleterre intègrent plus de vétérans.</li>
+                        <li> <strong>Styles de jeu et exigences physiques</strong> : Les ligues physiques favorisent des joueurs expérimentés, tandis que d’autres privilégient la vitesse des jeunes.</li>
+                        <li> <strong>Opportunités de transfert</strong> : Certains pays attirent des joueurs en fin de carrière avec des contrats avantageux.</li>
                     </ul>
 
                     <h3>🔎 Conclusion</h3>
@@ -287,55 +287,52 @@ function App() {
 
                     <h3>📊 Analyse des valeurs clés</h3>
                     <ul>
-                        <li>🔹 <strong>Âge minimum :</strong> 16.36 ans</li>
-                        <li>📍 <strong>1er quartile (Q1) :</strong> 23.68 ans</li>
-                        <li>⚖️ <strong>Médiane :</strong> 26.48 ans</li>
-                        <li>📍 <strong>3e quartile (Q3) :</strong> 29.50 ans</li>
-                        <li>📈 <strong>Limite supérieure :</strong> 38.23 ans</li>
-                        <li>🔹 <strong>Âge maximum :</strong> 43.30 ans</li>
+                        <li> <strong>Âge minimum :</strong> 16.36 ans</li>
+                        <li><strong>1er quartile (Q1) :</strong> 23.68 ans</li>
+                        <li><strong>Médiane :</strong> 26.48 ans</li>
+                        <li> <strong>3e quartile (Q3) :</strong> 29.50 ans</li>
+                        <li> <strong>Limite supérieure :</strong> 38.23 ans</li>
+                        <li> <strong>Âge maximum :</strong> 43.30 ans</li>
                     </ul>
 
                     <h3>📌 Répartition des joueurs</h3>
                     <ul>
-                        <li>⚽ <strong>La majorité des joueurs ont entre 20 et 35 ans</strong>, avec un pic autour de 25-27 ans.</li>
-                        <li>🚀 <strong>Très peu de joueurs ont moins de 18 ans ou plus de 38 ans</strong>.</li>
-                        <li>📊 <strong>La boîte à moustaches montre une forte concentration entre 23 et 30 ans</strong>, 
+                        <li> <strong>La majorité des joueurs ont entre 20 et 35 ans</strong>, avec un pic autour de 25-27 ans.</li>
+                        <li> <strong>Très peu de joueurs ont moins de 18 ans ou plus de 38 ans</strong>.</li>
+                        <li> <strong>La boîte à moustaches montre une forte concentration entre 23 et 30 ans</strong>, 
                             indiquant que la plupart des joueurs professionnels évoluent dans cette tranche d’âge.</li>
-                        <li>🎭 <strong>Certains joueurs atypiques dépassent 40 ans</strong>, ce qui reste rare dans le football de haut niveau.</li>
+                        <li><strong>Certains joueurs atypiques dépassent 40 ans</strong>, ce qui reste rare dans le football de haut niveau.</li>
                     </ul>
                 </div>
 
                 <div className="analysis-container">
                         <TaillePoidsJoueurs />
                             <p>
-                                Ces graphiques comparent la <strong>taille moyenne (cm)</strong> et le <strong>poids moyen (kg)</strong> des joueurs 
-                                en fonction de leur <strong>Work Rate</strong> offensif (<em>Attacking</em>) et défensif (<em>Defensive</em>), 
-                                répartis en trois catégories : <strong>Low (faible)</strong>, <strong>Medium (moyen)</strong> et <strong>High (élevé)</strong>.
+                            Ces graphiques comparent la taille moyenne (cm) et le poids moyen (kg) des joueurs en fonction de leur note globale offensive (Attacking) et défensive (Defensive), réparties en trois catégories : Low (faible), Medium (moyen) et High (élevé).
+
                             </p>
 
                             <h3>📏 Taille moyenne des joueurs</h3>
                             <ul>
-                                <li>📊 <strong>La taille des joueurs varie peu</strong> en fonction du Work Rate, restant globalement autour de 180 cm.</li>
-                                <li>🛡️ <strong>Les joueurs avec un Work Rate défensif élevé</strong> sont légèrement plus grands que ceux avec un Work Rate offensif élevé.</li>
-                                <li>📉 Aucune tendance forte ne se dégage entre Work Rate et taille, suggérant que ce critère n’a pas d’impact majeur sur la morphologie des joueurs.</li>
+                                <li><strong>La taille des joueurs varie peu</strong> en fonction du Work Rate (note globale), restant globalement autour de 180 cm.</li>
+                                <li><strong>Les joueurs avec un Work Rate défensif élevé</strong> sont  plus grands que ceux avec un Work Rate offensif élevé.</li>
+                              
                             </ul>
 
                             <h3>⚖️ Poids moyen des joueurs</h3>
                             <ul>
-                                <li>🏋️ <strong>Les joueurs défensifs</strong> ont généralement un poids moyen légèrement plus élevé que les joueurs offensifs.</li>
-                                <li>📉 <strong>Le poids moyen tourne autour de 75-78 kg</strong>, avec une variation mineure entre les différentes catégories.</li>
-                                <li>🛡️ <strong>Les joueurs ayant un Work Rate défensif élevé</strong> semblent être un peu plus lourds que ceux avec un Work Rate offensif élevé, 
-                                    ce qui pourrait s’expliquer par une nécessité de robustesse physique pour la récupération du ballon.</li>
+                                <li>Les joueurs défensifs ont généralement un poids moyen plus élevé que les joueurs offensifs, quelle que soit l’intensité du Work Rate.</li>
+                                <li>Le poids moyen tourne autour de 75-78 kg, avec une variation mineure entre les différentes catégories.</li>
+                                <li>Les joueurs ayant un Work Rate défensif élevé semblent être plus lourds que ceux avec un Work Rate offensif élevé, ce qui pourrait s’expliquer par une nécessité de robustesse physique pour la récupération du ballon.</li>
                             </ul>
 
                             <h3>📊 Conclusion générale </h3>
-                            <p>En combinant ces analyses avec la distribution des âges des joueurs, plusieurs tendances se dégagent :</p>
+                            <p>En combinant ces analyses avec la distribution des âges des joueurs, on peut dégager plusieurs tendances :</p>
                             <ul>
-                                <li>📅 <strong>La majorité des joueurs ont entre 23 et 30 ans</strong>, période où leurs performances physiques et tactiques sont à leur apogée.</li>
-                                <li>📏 <strong>La taille et le poids moyens des joueurs restent relativement constants</strong> selon le Work Rate, 
-                                    bien que les profils défensifs soient souvent plus grands et plus lourds.</li>
-                                <li>⚽ <strong>L’impact du Work Rate sur la morphologie des joueurs semble limité</strong>, 
-                                    bien que les joueurs défensifs tendent à être légèrement plus physiques.</li>
+                                <li><strong>La majorité des joueurs sont agés de 23 à 30 ans</strong>, , ce qui correspond aux années où les performances physiques et tactiques sont à leur apogée.</li>
+                                <li><strong>La taille et le poids moyens des joueurs sont relativement constants</strong> selon le Work Rate, avec une tendance aux joueurs défensifs plus grands et plus lourds.
+                                </li>
+                                <li><strong> La morphologie</strong> semble influencer les types de profils, avec des joueurs plus physiques occupant davantage des rôles défensifs.</li>
                             </ul> 
                         
                 </div>    
@@ -351,20 +348,20 @@ function App() {
 
                 <h3>📊 Tendances générales</h3>
                 <ul>
-                    <li>⚡ <strong>Les attaquants</strong> se distinguent par une meilleure <strong>accélération</strong>, <strong>finition</strong> et <strong>positionnement</strong>, 
+                    <li><strong>Les attaquants</strong> se distinguent par une meilleure <strong>accélération</strong>, <strong>finition</strong> et <strong>positionnement</strong>, 
                         essentiels pour marquer des buts et se démarquer en attaque.</li>
-                    <li>🛡️ <strong>Les défenseurs</strong> sont largement supérieurs en <strong>tacle</strong>, <strong>marquage</strong> et <strong>force</strong>, 
+                    <li><strong>Les défenseurs</strong> sont largement supérieurs en <strong>tacle</strong>, <strong>marquage</strong> et <strong>force</strong>, 
                         des compétences fondamentales pour bloquer les adversaires et récupérer le ballon.</li>
-                    <li>⚖️ <strong>La moyenne générale</strong> (en vert) se situe entre ces deux extrêmes, illustrant un équilibre entre les différentes compétences.</li>
+                    <li><strong>La moyenne générale</strong> (en vert) se situe entre ces deux extrêmes, illustrant un équilibre entre les différentes compétences.</li>
                 </ul>
 
                 <h3>📌 Différences marquées entre profils</h3>
                 <ul>
-                    <li>🏃‍♂️ <strong>Accélération et positionnement :</strong> Les attaquants surpassent les autres joueurs, 
+                    <li><strong>Accélération et positionnement :</strong> Les attaquants surpassent les autres joueurs, 
                         ce qui leur permet de se placer efficacement et de prendre de vitesse les défenseurs.</li>
-                    <li>🎯 <strong>Finition (finishing) :</strong> Attribut clé des attaquants, cet aspect est nettement inférieur chez les défenseurs.</li>
-                    <li>🛑 <strong>Tacle et marquage :</strong> Les défenseurs dominent largement ces domaines, leur permettant de stopper les attaques adverses.</li>
-                    <li>🏋️ <strong>Force physique (strength) :</strong> Les défenseurs affichent une force bien plus élevée que les attaquants, 
+                    <li> <strong>Finition (finishing) :</strong> Attribut clé des attaquants, cet aspect est nettement inférieur chez les défenseurs.</li>
+                    <li><strong>Tacle et marquage :</strong> Les défenseurs dominent largement ces domaines, leur permettant de stopper les attaques adverses.</li>
+                    <li><strong>Force physique (strength) :</strong> Les défenseurs affichent une force bien plus élevée que les attaquants, 
                         un atout crucial pour les duels aériens et les confrontations physiques.</li>
                 </ul>
 
@@ -386,7 +383,7 @@ function App() {
 
                     <h3>📊 Tendances générales</h3>
                     <ul>
-                        <li>🏆 <strong>Angleterre (75.07)</strong>, <strong>Italie (74.66)</strong> et  <strong>Espagne (74.62)</strong> 
+                        <li> <strong>Angleterre (75.07)</strong>, <strong>Italie (74.66)</strong> et  <strong>Espagne (74.62)</strong> 
                             affichent les meilleures notes moyennes, ce qui témoigne d’un effectif globalement plus compétitif.</li>
                         <li> <strong>Allemagne (73.96)</strong> et  <strong>France (71.89)</strong> suivent de près avec des notes élevées, 
                             confirmant la qualité de leur formation.</li>
@@ -397,9 +394,9 @@ function App() {
                     </ul>
                     <h3>📌 Analyse rapide</h3>
                     <ul>
-                        <li>🏅 <strong>Les pays du top 3 (Angleterre, Italie, Espagne)</strong> dominent en termes de qualité moyenne des joueurs.</li>
-                        <li>📉 <strong>L’Écosse se démarque avec la note la plus basse (64.86)</strong>, montrant un écart net avec les autres nations.</li>
-                        <li>⚽ <strong>Le classement reflète partiellement le niveau des championnats nationaux</strong>, 
+                        <li><strong>Les pays du top 3 (Angleterre, Italie, Espagne)</strong> dominent en termes de qualité moyenne des joueurs.</li>
+                        <li><strong>L’Écosse se démarque avec la note la plus basse (64.86)</strong>, montrant un écart net avec les autres nations.</li>
+                        <li> <strong>Le classement reflète partiellement le niveau des championnats nationaux</strong>, 
                             où les ligues les plus compétitives attirent de meilleurs joueurs.</li>
                     </ul>
                     <h3>🔎 Conclusion</h3>
@@ -427,32 +424,32 @@ function App() {
                     <ul>
                         <li>🏠 <strong>Les victoires à domicile sont légèrement sous-estimées</strong>
                             <ul>
-                                <li>🔹 <strong>Probabilité estimée :</strong> 44,8 %</li>
-                                <li>📊 <strong>Fréquence réelle :</strong> 45,9 %</li>
-                                <li>📉 Cette différence, bien que minime, suggère que <strong>les équipes jouant à domicile gagnent un peu plus souvent</strong> que ce qui est anticipé.</li>
+                                <li> <strong>Probabilité estimée :</strong> 44,8 %</li>
+                                <li> <strong>Fréquence réelle :</strong> 45,9 %</li>
+                                <li> Cette différence, bien que minime, suggère que <strong>les équipes jouant à domicile gagnent un peu plus souvent</strong> que ce qui est anticipé.</li>
                             </ul>
                         </li>
                         <li>⚖️ <strong>Les matchs nuls sont bien anticipés</strong>
                             <ul>
-                                <li>🔹 <strong>Probabilité estimée :</strong> 25,9 %</li>
-                                <li>📊 <strong>Fréquence réelle :</strong> 25,3 %</li>
-                                <li>✅ <strong>L’écart est quasi inexistant</strong>, ce qui montre que le modèle de prédiction capture bien cette tendance.</li>
+                                <li> <strong>Probabilité estimée :</strong> 25,9 %</li>
+                                <li> <strong>Fréquence réelle :</strong> 25,3 %</li>
+                                <li> <strong>L’écart est quasi inexistant</strong>, ce qui montre que le modèle de prédiction capture bien cette tendance.</li>
                             </ul>
                         </li>
                         <li>🛫 <strong>Les victoires à l’extérieur sont légèrement surestimées</strong>
                             <ul>
-                                <li>🔹 <strong>Probabilité estimée :</strong> 29,4 %</li>
-                                <li>📊 <strong>Fréquence réelle :</strong> 28,8 %</li>
-                                <li>📉 Ce biais peut être lié à une tendance à considérer que <strong>l’écart entre les équipes est plus faible qu’en réalité</strong>.</li>
+                                <li> <strong>Probabilité estimée :</strong> 29,4 %</li>
+                                <li> <strong>Fréquence réelle :</strong> 28,8 %</li>
+                                <li> Ce biais peut être lié à une tendance à considérer que <strong>l’écart entre les équipes est plus faible qu’en réalité</strong>.</li>
                             </ul>
                         </li>
                     </ul>
 
                     <h3>📌 Explications possibles des différences</h3>
                     <ul>
-                        <li>📢 <strong>Influence du public et des conditions de jeu :</strong> Les équipes à domicile bénéficient d’un avantage souvent sous-évalué.</li>
-                        <li>💪 <strong>Facteurs psychologiques et fatigue :</strong> Jouer à l’extérieur est plus éprouvant, ce qui peut expliquer une surestimation des victoires des visiteurs.</li>
-                        <li>💰 <strong>Ajustements des cotes :</strong> Les bookmakers intègrent d’autres paramètres comme les mises des parieurs, ce qui peut légèrement biaiser les prévisions.</li>
+                        <li> <strong>Influence du public et des conditions de jeu :</strong> Les équipes à domicile bénéficient d’un avantage souvent sous-évalué.</li>
+                        <li><strong>Facteurs psychologiques et fatigue :</strong> Jouer à l’extérieur est plus éprouvant, ce qui peut expliquer une surestimation des victoires des visiteurs.</li>
+                        <li> <strong>Ajustements des cotes :</strong> Les bookmakers intègrent d’autres paramètres comme les mises des parieurs, ce qui peut légèrement biaiser les prévisions.</li>
                     </ul>
 
                     <h3>🔎 Conclusion</h3>

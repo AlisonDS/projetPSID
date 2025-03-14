@@ -158,7 +158,7 @@ footer {
 
 /* Ajout d'icônes pour chaque élément de liste */
 .analysis-container li::before {
-  content: "⚽";
+ 
   margin-right: 5px;
 }
 
