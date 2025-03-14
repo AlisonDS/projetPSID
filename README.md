@@ -48,12 +48,14 @@ Pour lancer Foot Score, suivez ces étapes simples :
 git clone https://github.com/AlisonDS/projetPSID.git
 cd projetPSID
 npm install
+cd frontend
 npm start
 ```
 
 ## Backend
 
 ```
+cd backend
 pip install -r requirements.txt
 python app.py
 ```
