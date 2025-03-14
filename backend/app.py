@@ -446,6 +446,9 @@ def comparaison_joueurs():
     fig_dict = convert_ndarray(fig_dict)  # Conversion des ndarray en liste
     return jsonify(fig_dict)
 
+import plotly.express as px
+from flask import jsonify
+
 @app.route('/overall_rating')
 def overall_rating():
 
@@ -488,8 +491,11 @@ def overall_rating():
     # Améliorer l'affichage
     fig.update_layout(xaxis=dict(title="Pays", tickangle=-45), yaxis=dict(title="Note Globale Moyenne"))
 
-    # Afficher le graphique interactif
-    fig.show()
+    # Conversion en JSON
+    fig_dict = fig.to_dict()
+    fig_dict = convert_ndarray(fig_dict)  # Conversion des ndarray en liste
+    return jsonify(fig_dict)
+
 
 # NE PAS OUBLIER !!!!!!!!!!!!!!!!!!!!!!!!!!!
 @app.route('/Bookmakers')

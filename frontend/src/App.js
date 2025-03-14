@@ -7,6 +7,7 @@ import PcaPosition from "./components/PcaPosition";
 import PaysAgeGraph from "./components/PaysAgeGraph";
 import TaillePoidsJoueurs from "./components/TaillePoids";
 import ComparaisonJoueursGraph from "./components/ComparaisonJoueursGraph";
+import OverallRatingGraph from "./components/OverallRatingGraphGraph";
 
 function App() {
     return (
@@ -25,6 +26,8 @@ function App() {
             <TaillePoidsJoueurs />
             <h1>Foot Score - Comparaison des joueurs</h1>
             <ComparaisonJoueursGraph />
+            <h1>Foot Score - Moyenne de l'Overall Rating des joueurs par Pays</h1>
+            <OverallRatingGraph />
         </div>
     );
 }
