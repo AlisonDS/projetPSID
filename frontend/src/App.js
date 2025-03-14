@@ -8,6 +8,7 @@ import TaillePoidsJoueurs from "./components/TaillePoids";
 import ComparaisonJoueursGraph from "./components/ComparaisonJoueursGraph";
 import OverallRatingGraph from "./components/OverallRatingGraphGraph";
 import BookmakersGraph from "./components/BookmakersGraph";
+
 import "./App.css";
  
 import Footer from "./components/Footer"; 
@@ -17,7 +18,12 @@ function App() {
 
     return (
         <div className="App">
-            {/* Barre de navigation */}
+            {/* Bandeau supérieur avec le logo */}
+            <div className="top-banner">
+            <img src="/logo-footscore.jpg" alt="Foot Score Logo" />
+            </div>
+
+            {/* Bandeau inférieur avec le menu */}
             <nav className="navbar">
                 <ul>
                     <li className={activeTab === "Accueil" ? "active" : ""} onClick={() => setActiveTab("Accueil")}>
@@ -31,6 +37,14 @@ function App() {
                     </li>
                 </ul>
             </nav>
+
+            {/* Contenu dynamique */}
+            <div className="content">
+                {activeTab === "Accueil" && <h1>🏠 Bienvenue sur l'Accueil</h1>}
+                {activeTab === "Modèle ML" && <h1>🤖 Section Modèle ML</h1>}
+                {activeTab === "Dashboard" && <h1>📊 Dashboard des statistiques</h1>}
+            </div>
+
             {activeTab === "Accueil" && (
                 <div className="home-container">
                     <h1>📊 Projet Football Data - Prédiction des Scores</h1>
@@ -240,11 +254,11 @@ function App() {
                         Toutefois, certaines différences se dégagent :
                     </p>
                     <ul>
-                        <li>🏴 <strong>Angleterre (27.21 ans)</strong>,  <strong>Italie (27.84 ans)</strong> et  <strong>France (26.44 ans)</strong> 
+                        <li>🏴 <strong>Angleterre (27 ans)</strong>,  <strong>Italie (27 ans)</strong> et  <strong>France (26 ans)</strong> 
                             affichent des médianes plus élevées, traduisant une présence plus marquée de joueurs expérimentés.</li>
-                        <li> <strong>Pays-Bas (24.38 ans)</strong> et  <strong>Allemagne (25.97 ans)</strong> montrent une répartition plus large, 
+                        <li> <strong>Pays-Bas (24 ans)</strong> et  <strong>Allemagne (25 ans)</strong> montrent une répartition plus large, 
                             avec des jeunes joueurs et des vétérans.</li>
-                        <li>🏴 <strong>Écosse</strong> et  <strong>Espagne</strong> ont une dispersion similaire, avec une répartition bien centrée autour de 26-27 ans.</li>
+                        <li>🏴 <strong>Écosse</strong> et  <strong>Espagne</strong> ont une dispersion similaire, avec une répartition bien centrée autour de 25-26 ans.</li>
                     </ul>
 
                     <h3>📌 Présence de joueurs très jeunes et plus âgés</h3>
