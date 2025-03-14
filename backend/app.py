@@ -348,20 +348,9 @@ def taille_poids_joueurs():
     # Vérifier les colonnes disponibles
     print("Colonnes dans player_attributes_df:", player_attributes_df.columns)
 
-    # Vérifier les premières lignes des colonnes work rate
-    print(player_attributes_df[['attacking_work_rate', 'defensive_work_rate']].head())
-
-    # Vérifier les valeurs uniques
-    print("Valeurs uniques dans attacking_work_rate:", player_attributes_df['attacking_work_rate'].unique())
-    print("Valeurs uniques dans defensive_work_rate:", player_attributes_df['defensive_work_rate'].unique())
-
     # Nettoyer les données : supprimer les espaces et standardiser la casse
     player_attributes_df['attacking_work_rate'] = player_attributes_df['attacking_work_rate'].str.strip().str.title()
     player_attributes_df['defensive_work_rate'] = player_attributes_df['defensive_work_rate'].str.strip().str.title()
-
-    # Vérifier les valeurs manquantes
-    print("Valeurs manquantes dans attacking_work_rate:", player_attributes_df['attacking_work_rate'].isna().sum())
-    print("Valeurs manquantes dans defensive_work_rate:", player_attributes_df['defensive_work_rate'].isna().sum())
 
     # Supprimer les lignes avec des valeurs manquantes
     player_attributes_df = player_attributes_df.dropna(subset=['attacking_work_rate', 'defensive_work_rate'])
@@ -390,30 +379,11 @@ def taille_poids_joueurs():
     size_data = pd.concat([attacking_avg, defensive_avg])
     size_data['work_rate'] = pd.Categorical(size_data['work_rate'], categories=['Low', 'Medium', 'High'], ordered=True)  # Ordonner les catégories
 
-    # Afficher les données moyennes
-    print(size_data)
+    # Convertir les objets ndarray en liste
+    size_data_converted = convert_ndarray(size_data.to_dict(orient='records'))
 
-    # Visualisation
-    plt.figure(figsize=(14, 6))
-
-    # Graphique pour la taille moyenne
-    plt.subplot(1, 2, 1)
-    sns.barplot(x='work_rate', y='height', hue='work_rate_type', data=size_data, palette='coolwarm')
-    plt.title('Taille moyenne des joueurs\npar Attacking et Defensive Work Rate')
-    plt.ylabel('Taille moyenne (cm)')
-    plt.xlabel('Work Rate')
-    plt.legend(title='Type de Work Rate', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    # Graphique pour le poids moyen
-    plt.subplot(1, 2, 2)
-    sns.barplot(x='work_rate', y='weight', hue='work_rate_type', data=size_data, palette='coolwarm')
-    plt.title('Poids moyen des joueurs\npar Attacking et Defensive Work Rate')
-    plt.ylabel('Poids moyen (kg)')
-    plt.xlabel('Work Rate')
-    plt.legend(title='Type de Work Rate', bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    plt.tight_layout()
-    plt.show()
+    # Retourner les données converties dans la réponse JSON
+    return jsonify({'sizeData': size_data_converted})
 
 
 @app.route('/Comparaison_joueurs')

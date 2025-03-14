@@ -5,6 +5,7 @@ import "./App.css";
 import PcaTeamAttributes from "./components/PcaTeamAttributes";
 import PcaPosition from "./components/PcaPosition";
 import PaysAgeGraph from "./components/PaysAgeGraph";
+import TaillePoidsJoueurs from "./components/TaillePoids";
 
 function App() {
     return (
@@ -19,6 +20,8 @@ function App() {
             <PcaPosition />
             <h1>Foot Score - Distribution des âges des joueurs par pays</h1>
             <PaysAgeGraph />
+            <h1>Foot Score - Taille et Poids des joueurs par Work Rate</h1>
+            <TaillePoidsJoueurs />
         </div>
     );
 }
