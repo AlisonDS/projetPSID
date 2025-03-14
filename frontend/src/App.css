@@ -73,3 +73,15 @@ h1 {
     margin-bottom: 10px;
   }
 }
+/* Réduction de la taille des graphiques PCA */
+.chart-container {
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.small-chart {
+  width: 80%;
+  max-width: 600px; /* Réduction de la taille */
+  height: 400px;  /* Ajustement de la hauteur */
+}

@@ -11,7 +11,7 @@ import BookmakersGraph from "./components/BookmakersGraph";
 import "./App.css";
 
 function App() {
-    const [activeTab, setActiveTab] = useState("Accueil");
+    const [activeTab, setActiveTab] = useState("Dashboard"); // Dashboard par défaut
 
     return (
         <div className="App">
@@ -31,41 +31,36 @@ function App() {
             </nav>
 
             {/* Contenu dynamique selon le menu sélectionné */}
-            {activeTab === "Accueil" && (
-                  <>
-                 
-              </>
-            )}
-
-            {activeTab === "Modèle ML" && (
+            {activeTab === "Dashboard" && (
                 <>
-                   
+                    <h1>Foot Score - Répartition des Résultats</h1>
+                    <RepartitionDomicileExt />
+                    <h1>Foot Score - Carte des Buts</h1>
+                    <FootballMap />
+                    
+                    {/* Section PCA avec style réduit */}
+                    <div className="chart-container small-chart">
+                        <h1>Foot Score - Cercle des Corrélations PCA</h1>
+                        <PcaTeamAttributes />
+                    </div>
+                    
+                    <div className="chart-container small-chart">
+                        <h1>Foot Score - ACP des équipes colorées par pays</h1>
+                        <PcaPosition />
+                    </div>
+                    <h1>Foot Score - Distribution des âges des joueurs par pays</h1>
+                    <PaysAgeGraph />
+                    <h1>Foot Score - Taille et Poids des joueurs par Work Rate</h1>
+                    <TaillePoidsJoueurs />
+                    <h1>Foot Score - Comparaison des joueurs</h1>
+                    <ComparaisonJoueursGraph />
+                    <h1>Foot Score - Moyenne de l'Overall Rating des joueurs par Pays</h1>
+                    <OverallRatingGraph />
+                    <h1>Foot Score - Comparaison des Bookmakers</h1>
+                    <BookmakersGraph />
                 </>
             )}
-
-            {activeTab === "Dashboard" && (
-             <>
-             <h1>Foot Score - Répartition des Résultats</h1>
-             <RepartitionDomicileExt />
-             <h1>Foot Score - Carte des Buts</h1>
-             <FootballMap />
-             <h1>Foot Score - Cercle des Corrélations PCA</h1>
-             <PcaTeamAttributes />
-             <h1>Foot Score - ACP des équipes colorées par pays</h1>
-             <PcaPosition />
-             <h1>Foot Score - Distribution des âges des joueurs par pays</h1>
-             <PaysAgeGraph />
-             <h1>Foot Score - Taille et Poids des joueurs par Work Rate</h1>
-             <TaillePoidsJoueurs />
-             <h1>Foot Score - Comparaison des joueurs</h1>
-             <ComparaisonJoueursGraph />
-             <h1>Foot Score - Moyenne de l'Overall Rating des joueurs par Pays</h1>
-             <OverallRatingGraph />
-             <h1>Foot Score - Comparaison des Bookmakers</h1>
-             <BookmakersGraph />
-         </>
-     )}
- </div>
+        </div>
     );
 }
 
