@@ -497,7 +497,6 @@ def overall_rating():
     return jsonify(fig_dict)
 
 
-# NE PAS OUBLIER !!!!!!!!!!!!!!!!!!!!!!!!!!!
 @app.route('/Bookmakers')
 def Bookmakers():
     global match_df  # Utilise la variable globale match_df
@@ -559,7 +558,11 @@ def Bookmakers():
     )
 
     fig.update_layout(xaxis_title="Résultat du Match", yaxis_title="Probabilité / Fréquence")
-    fig.show()
+
+    # Conversion en JSON
+    fig_dict = fig.to_dict()
+    fig_dict = convert_ndarray(fig_dict)  # Conversion des ndarray en liste
+    return jsonify(fig_dict)
 
 if __name__ == '__main__':
     app.run(debug=True)

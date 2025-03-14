@@ -8,6 +8,7 @@ import PaysAgeGraph from "./components/PaysAgeGraph";
 import TaillePoidsJoueurs from "./components/TaillePoids";
 import ComparaisonJoueursGraph from "./components/ComparaisonJoueursGraph";
 import OverallRatingGraph from "./components/OverallRatingGraphGraph";
+import BookmakersGraph from "./components/BookmakersGraph";
 
 function App() {
     return (
@@ -28,6 +29,8 @@ function App() {
             <ComparaisonJoueursGraph />
             <h1>Foot Score - Moyenne de l'Overall Rating des joueurs par Pays</h1>
             <OverallRatingGraph />
+            <h1>Foot Score - Comparaison des Bookmakers</h1>
+            <BookmakersGraph />
         </div>
     );
 }
