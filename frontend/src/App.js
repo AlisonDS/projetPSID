@@ -9,6 +9,8 @@ import ComparaisonJoueursGraph from "./components/ComparaisonJoueursGraph";
 import OverallRatingGraph from "./components/OverallRatingGraphGraph";
 import BookmakersGraph from "./components/BookmakersGraph";
 import "./App.css";
+ 
+import Footer from "./components/Footer"; 
 
 function App() {
     const [activeTab, setActiveTab] = useState("Dashboard"); // Dashboard par défaut
@@ -90,10 +92,8 @@ function App() {
                         </ul>
                         <p>Ces informations sont essentielles pour identifier les facteurs influençant les scores et affiner les modèles prédictifs.</p>
                     </section>
-
-                    <footer>
-                        <p>© 2025 Projet Football Data | Tous droits réservés</p>
-                    </footer>
+                    <Footer />
+                   
                 </div>
             )}
             {/* Contenu dynamique selon le menu sélectionné */}
@@ -121,9 +121,17 @@ function App() {
                     <OverallRatingGraph />
                  
                     <BookmakersGraph />
+                    <Footer />
                 </>
             )}
+            {activeTab === "Modèle ML" && (
+                <div className="dashboard-container">
+                    <h1>Modèle de Machine Learning</h1>
+                    <Footer /> {/* Ajout du footer ici */}
+                </div>
+            )}
         </div>
+        
     );
 }
 
