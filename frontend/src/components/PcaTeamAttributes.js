@@ -20,7 +20,7 @@ const PcaTeamAttributes = () => {
     }, []);
 
     return (
-        <div className="pca-container">
+        <div >
             <h2>Cercle des corrélations PCA</h2>
             {image ? (
                 <img 

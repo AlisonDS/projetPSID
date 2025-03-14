@@ -28,7 +28,7 @@ const PcaPosition = () => {
     }, []);
 
     return (
-        <div className="pca-container">
+        <div>
             <h2>ACP des Équipes colorées par pays</h2>
             {loading && <p>Chargement en cours...</p>}
             {error && <p className="error-message">{error}</p>}

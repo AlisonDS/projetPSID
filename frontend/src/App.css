@@ -85,3 +85,42 @@ h1 {
   max-width: 600px; /* Réduction de la taille */
   height: 400px;  /* Ajustement de la hauteur */
 }
+/* Page Accueil */
+.home-container {
+  width: 80%;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  text-align: left;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+section {
+  margin-bottom: 20px;
+  padding: 10px;
+  border-left: 4px solid #61dafb;
+  background: #f9f9f9;
+  border-radius: 5px;
+}
+
+h1 {
+  text-align: center;
+  color: #282c34;
+}
+
+h2 {
+  color: #282c34;
+}
+
+ul, ol {
+  padding-left: 20px;
+}
+
+footer {
+  text-align: center;
+  font-size: 14px;
+  color: gray;
+  margin-top: 20px;
+}
