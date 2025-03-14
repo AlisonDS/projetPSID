@@ -219,8 +219,52 @@ def pca_team_attributes():
     # Retourner l'image encodée en base64 dans la réponse
     return jsonify({'image': f'data:image/png;base64,{img_base64}'})
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route('/pca_position')
+def pca_position():
+    # Fusion des tables pour associer les équipes à leur pays
+    team_with_country = pd.merge(
+        team_df,
+        match_df[['home_team_api_id', 'country_id']].rename(columns={'home_team_api_id': 'team_api_id'}),
+        on='team_api_id',
+        how='left'
+    )
+
+    if 'country_id' not in country_df.columns:
+        country_df.rename(columns={'id': 'country_id'}, inplace=True)
+
+    team_with_country = pd.merge(team_with_country, country_df, on='country_id')
+    team_with_attributes = pd.merge(team_with_country, team_attributes_df, on='team_api_id')
+
+    # Sélection des colonnes pertinentes
+    attributes = team_with_attributes.select_dtypes(include=[np.number]).columns.tolist()
+    attributes = [attr for attr in attributes if attr not in ['id', 'team_fifa_api_id', 'team_api_id', 'date']]
+
+    # Extraction et standardisation des données
+    X = team_with_attributes[attributes].fillna(team_with_attributes[attributes].median())
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # ACP avec 2 composantes principales
+    pca = PCA(n_components=2)
+    X_pca = pca.fit_transform(X_scaled)
+
+    # Création du DataFrame avec les résultats de l'ACP
+    pca_df = pd.DataFrame(data=X_pca, columns=['PC1', 'PC2'])
+    pca_df['country'] = team_with_attributes['name']
+    pca_df['team_name'] = team_with_attributes['team_short_name']
+
+    # Création du graphique interactif avec plotly
+    fig = px.scatter(
+        pca_df, 
+        x='PC1', 
+        y='PC2', 
+        color='country', 
+        hover_data=['team_name'], 
+        title="ACP des équipes colorées par pays"
+    )
+
+    # Affichage
+    fig.show()
 
 
 @app.route('/pays_age')
