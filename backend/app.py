@@ -308,8 +308,8 @@ def pays_age():
     # Vérification après la fusion
     print(player_with_country.head())
 
-    # Étape 6 : Création du graphique interactif avec filtres
-    fig = px.box(
+    # Étape 6 : Création du graphique boxplot avec filtres
+    fig_boxplot = px.box(
         player_with_country,
         x='name',
         y='age',
@@ -318,10 +318,11 @@ def pays_age():
         labels={"name": "Pays", "age": "Âge"},
         hover_data=['age'],
     )
-    fig.show()
+    fig_boxplot_dict = fig_boxplot.to_dict()
+    fig_boxplot_dict = convert_ndarray(fig_boxplot_dict)  # Applique la conversion des ndarrays en listes
 
     # Création de l'histogramme interactif
-    fig = px.histogram(
+    fig_histogram = px.histogram(
         player_with_country, 
         x="age", 
         nbins=30, 
@@ -331,17 +332,14 @@ def pays_age():
         title="Distribution des âges des joueurs",
         labels={"age": "Âge", "count": "Nombre de joueurs"}
     )
+    fig_histogram_dict = fig_histogram.to_dict()
+    fig_histogram_dict = convert_ndarray(fig_histogram_dict)  # Applique la conversion des ndarrays en listes
 
-    # Amélioration de l'affichage
-    fig.update_layout(
-        xaxis_title="Âge",
-        yaxis_title="Nombre de joueurs",
-        bargap=0.05,  # Réduction de l'écart entre les barres pour un meilleur rendu
-        hovermode="x unified"  # Affichage des valeurs au survol
-    )
-
-    # Affichage du graphique interactif
-    fig.show()
+    # Retourner les deux graphiques sous forme de JSON
+    return jsonify({
+        "boxplot": fig_boxplot_dict,
+        "histogram": fig_histogram_dict
+    })
 
 @app.route('/taille_poids_joueurs')
 def taille_poids_joueurs():

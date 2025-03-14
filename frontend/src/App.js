@@ -4,6 +4,7 @@ import RepartitionDomicileExt from "./components/RepartitionDomicileExt";
 import "./App.css";
 import PcaTeamAttributes from "./components/PcaTeamAttributes";
 import PcaPosition from "./components/PcaPosition";
+import PaysAgeGraph from "./components/PaysAgeGraph";
 
 function App() {
     return (
@@ -16,6 +17,8 @@ function App() {
             <PcaTeamAttributes />
             <h1>Foot Score - ACP des équipes colorées par pays</h1>
             <PcaPosition />
+            <h1>Foot Score - Distribution des âges des joueurs par pays</h1>
+            <PaysAgeGraph />
         </div>
     );
 }
