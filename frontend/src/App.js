@@ -228,19 +228,64 @@ function App() {
                         <p>
                             Les équipes qui privilégient la construction rapide et la création d’occasions par le jeu de passes 
                             (<strong>buildUpPlay</strong> et <strong>chanceCreation</strong>) sont opposées aux équipes qui misent sur une 
-                            <strong>défense agressive et une forte pression défensive</strong>.
+                            <strong> défense agressive et une forte pression défensive</strong>.
                         </p>
                         <p>
-                            Cette opposition montre que **PC1** distingue les équipes par leur approche du jeu :
-                            <strong>offensive et basée sur la possession d’un côté</strong>, 
+                            Cette opposition montre que PC1 distingue les équipes par leur approche du jeu :
+                            <strong> offensive et basée sur la possession d’un côté</strong>, 
                             <strong>défensive et axée sur la pression de l’autre</strong>.
                         </p>
                     </div>
                 
-                <div className="analysis-container">
-                        <PcaPosition />
-                    
-                </div>
+                    <div className="analysis-container">
+        <PcaPosition />
+            <p>
+                Le nuage de points représente la répartition des équipes européennes en fonction de leur style de jeu, distinguant celles axées sur l’attaque, la défense ou un équilibre entre les deux.
+            </p>
+
+            <h3>📌 Positionnement des équipes par pays</h3>
+
+            <h4>Espagne : Offensif mais faible en défense</h4>
+            <ul>
+                <li>Située dans la zone offensive (PC1 &gt; 0) avec un jeu fluide basé sur la possession.</li>
+                <li><strong>Forces :</strong> Excellente construction du jeu, passes précises, créativité offensive.</li>
+                <li><strong>Faiblesses :</strong> Défense plus fragile, équipes exposées aux contres.</li>
+                <li><strong>Style de jeu :</strong> Tiki-taka – domination technique, petites passes et contrôle du ballon.</li>
+            </ul>
+
+            <h4>Angleterre : Équilibré, performant en attaque et en défense</h4>
+            <ul>
+                <li> Positionnée au centre droit du graphique, reflétant un équilibre entre attaque et défense.</li>
+                <li><strong>Forces :</strong> Transition rapide, pressing intense, bon jeu aérien.</li>
+                <li><strong>Faiblesses :</strong> Manque de maîtrise tactique par rapport aux autres grandes nations.</li>
+                <li><strong>Style de jeu :</strong> Dynamique et physique, combinant puissance et rapidité.</li>
+            </ul>
+
+            <h4>Belgique : Plutôt défensif et inefficace en attaque</h4>
+            <ul>
+                <li> Située dans la zone défensive (PC1 &lt; 0), montrant une orientation plus prudente.</li>
+                <li><strong>Forces :</strong> Défense bien structurée, jeu physique et compact.</li>
+                <li><strong>Faiblesses :</strong> Manque de créativité offensive, difficulté à marquer des buts.</li>
+                <li><strong>Style de jeu :</strong> Solide mais limité offensivement, souvent axé sur les contre-attaques.</li>
+            </ul>
+
+            <h4>France,  Italie et Allemagne : Équilibrés mais moyens en attaque et en défense</h4>
+            <ul>
+                <li>Ces nations sont regroupées au centre du nuage de points, indiquant un jeu polyvalent.</li>
+                <li><strong>Forces :</strong> Adaptabilité aux adversaires, bons joueurs physiques et tactiques.</li>
+                <li><strong>Faiblesses :</strong> Ni ultra-offensif, ni ultra-défensif, parfois manque de tranchant.</li>
+                <li><strong>Style de jeu :</strong> Équilibré, combinant intensité et structure tactique.</li>
+            </ul>
+
+            <h4>Portugal, Pays-Bas et  Écosse : Plutôt bons en attaque, moyens en défense</h4>
+            <ul>
+                <li> Situés dans la zone offensive (PC1 &gt; 0) mais légèrement moins organisés défensivement.</li>
+                <li><strong>Forces :</strong> Capacité à marquer, créativité offensive, jeu rapide.</li>
+                <li><strong>Faiblesses :</strong> Défense moins rigoureuse, vulnérable contre des équipes bien organisées.</li>
+                <li><strong>Style de jeu :</strong> Axé sur l’attaque, privilégiant les dribbles et les passes rapides.</li>
+            </ul>
+        </div>
+
                 <div className="analysis-container">
                     <PaysAgeGraph />
                     <p>
