@@ -29,7 +29,7 @@ const TaillePoidsJoueurs = () => {
             <h2>Taille et Poids des joueurs par Work Rate</h2>
             {sizeData && (
                 <div>
-                    <h3>Taille et Poids selon le Work Rate</h3>
+                    
                     <Plot
                         data={[
                             {

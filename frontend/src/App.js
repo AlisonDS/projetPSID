@@ -99,30 +99,27 @@ function App() {
             {/* Contenu dynamique selon le menu sélectionné */}
             {activeTab === "Dashboard" && (
                 <>
-                    <h1>Foot Score - Répartition des Résultats</h1>
+                    
                     <RepartitionDomicileExt />
-                    <h1>Foot Score - Carte des Buts</h1>
+                    <h2>Répartition des buts par pays en Europe</h2>
                     <FootballMap />
                     
                     {/* Section PCA avec style réduit */}
-                    <div className="chart-container small-chart">
-                        <h1>Foot Score - Cercle des Corrélations PCA</h1>
+                    <div className="chart-container">
                         <PcaTeamAttributes />
                     </div>
-                    
-                    <div className="chart-container small-chart">
-                        <h1>Foot Score - ACP des équipes colorées par pays</h1>
-                    <PcaPosition />
+                    <div className="chart-container">
+                        <PcaPosition />
                     </div>
-                    <h1>Foot Score - Distribution des âges des joueurs par pays</h1>
+
                     <PaysAgeGraph />
-                    <h1>Foot Score - Taille et Poids des joueurs par Work Rate</h1>
-                    <TaillePoidsJoueurs />
-                    <h1>Foot Score - Comparaison des joueurs</h1>
+                    <div className="chart-container">
+                        <TaillePoidsJoueurs />
+                    </div>
                     <ComparaisonJoueursGraph />
-                    <h1>Foot Score - Moyenne de l'Overall Rating des joueurs par Pays</h1>
+                  
                     <OverallRatingGraph />
-                    <h1>Foot Score - Comparaison des Bookmakers</h1>
+                 
                     <BookmakersGraph />
                 </>
             )}

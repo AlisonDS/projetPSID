@@ -22,7 +22,7 @@ const PaysAgeGraph = () => {
     return (
         <div>
             <h2>Distribution des âges des joueurs par pays</h2>
-            <h3>Boxplot</h3>
+        
             {boxplotData ? (
                 <Plot
                     data={boxplotData.data}      // Données pour le boxplot
