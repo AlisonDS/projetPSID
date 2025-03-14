@@ -5,11 +5,14 @@ const PcaTeamAttributes = () => {
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        // Utilisation d'Axios pour récupérer l'image depuis Flask
         axios.get("http://127.0.0.1:5000/pca_team_attributes")
             .then((response) => {
-                console.log(response.data); // Vérifie la structure du JSON
-                setImage(response.data.image); // Stocke l'image base64 dans le state
+                console.log('Réponse de l\'API :', response.data); // Affiche toute la réponse
+                if (response.data && response.data.image) {
+                    setImage(response.data.image);  // Si la clé 'image' est présente, on l'enregistre
+                } else {
+                    console.error('Image non trouvée dans la réponse');
+                }
             })
             .catch((error) => {
                 console.error("Erreur de chargement de l'image:", error);
@@ -21,7 +24,7 @@ const PcaTeamAttributes = () => {
             <h2>Cercle des corrélations PCA</h2>
             {image ? (
                 <img 
-                    src={`data:image/png;base64,${image}`} 
+                    src={image}  // Affiche directement l'image encodée en base64
                     alt="Cercle des corrélations PCA" 
                     style={{ width: '80%', height: 'auto' }} // Ajuste la taille de l'image
                 />

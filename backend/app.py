@@ -11,7 +11,8 @@ import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from io import BytesIO
-
+import base64
+import io
 import os
 
 app = Flask(__name__)
@@ -163,24 +164,24 @@ def pca_team_attributes():
     # Extraire les données pertinentes
     X = team_attributes_df[attributes]
 
-    # Gérer les valeurs manquantes (remplacer par la médiane)
+    # Gérer les valeurs manquantes (par exemple, remplacer par la médiane)
     X = X.fillna(X.median())
 
-    # Standardiser les données
+    # Standardiser les données (moyenne = 0, écart-type = 1)
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Appliquer l'ACP
-    pca = PCA(n_components=2)
+    # Étape 2 : Appliquer l'ACP
+    pca = PCA(n_components=2)  # Choisir 2 composantes principales pour la visualisation 2D
     X_pca = pca.fit_transform(X_scaled)
 
-    # Calculer les corrélations entre les variables et les composantes principales
+    # Étape 3 : Calculer les corrélations entre les variables et les composantes principales
     correlations = np.corrcoef(X_scaled.T, X_pca.T)[:len(attributes), len(attributes):]
 
     # Créer un DataFrame pour les corrélations
     correlations_df = pd.DataFrame(correlations, columns=['PC1', 'PC2'], index=attributes)
 
-    # Créer le graphique
+    # Étape 4 : Tracer le cercle des corrélations
     plt.figure(figsize=(8, 8))
     ax = plt.gca()
 
@@ -194,7 +195,7 @@ def pca_team_attributes():
                 head_width=0.05, head_length=0.05, color='red')
         plt.text(correlations_df.loc[var, 'PC1'] * 1.1, correlations_df.loc[var, 'PC2'] * 1.1, var, color='black')
 
-    # Ajouter des lignes horizontales et verticales
+    # Ajouter des lignes horizontales et verticales pour le centre
     plt.axhline(0, color='gray', linestyle='--')
     plt.axvline(0, color='gray', linestyle='--')
 
@@ -207,16 +208,20 @@ def pca_team_attributes():
     plt.ylabel('Composante Principale 2 (PC2)')
     plt.title('Cercle des corrélations')
 
-    # Sauvegarder l'image dans un buffer en mémoire (au lieu de la sauvegarder sur disque)
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
+    # Convertir le graphique en image PNG dans un buffer en mémoire
+    img_bytes = io.BytesIO()
+    plt.savefig(img_bytes, format='png')
+    img_bytes.seek(0)
 
-    # Convertir l'image en base64 pour l'envoyer en réponse
-    img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+    # Encoder l'image en base64
+    img_base64 = base64.b64encode(img_bytes.read()).decode('utf-8')
 
-    # Retourner l'image encodée en base64
-    return jsonify({'image': img_base64})
+    # Retourner l'image encodée en base64 dans la réponse
+    return jsonify({'image': f'data:image/png;base64,{img_base64}'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
 
 @app.route('/pays_age')
 def pays_age():
