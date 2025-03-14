@@ -386,9 +386,11 @@ def taille_poids_joueurs():
     return jsonify({'sizeData': size_data_converted})
 
 
+import plotly.graph_objects as go
+from flask import jsonify
+
 @app.route('/Comparaison_joueurs')
 def comparaison_joueurs():
-
     # Fusionner les données des joueurs avec leurs attributs
     merged_df = pd.merge(player_df, player_attributes_df, on="player_api_id")
 
@@ -407,16 +409,11 @@ def comparaison_joueurs():
         "profile"
     ] = "Défenseur"
 
-    # Vérifier si les catégories sont bien présentes
-    print("Nombre de joueurs par catégorie:")
-    print(merged_df["profile"].value_counts())
-
     # Sélection des métriques importantes
     metrics = ['finishing', 'positioning', 'acceleration', 'standing_tackle', 'marking', 'strength']
 
-    # Vérifier s'il y a bien des joueurs dans chaque catégorie
+    # Moyennes des métriques par profil
     average_profiles = merged_df.groupby("profile")[metrics].mean().reset_index()
-    print("Catégories présentes dans average_profiles:", average_profiles["profile"].unique())
 
     # Normalisation entre 0 et 1
     for metric in metrics:
@@ -436,7 +433,7 @@ def comparaison_joueurs():
         values = row[metrics].tolist()
         values += values[:1]  # Boucler pour fermer le radar chart
         metrics_with_closure = metrics + [metrics[0]]
-        
+
         fig.add_trace(go.Scatterpolar(
             r=values,
             theta=metrics_with_closure,
@@ -444,14 +441,10 @@ def comparaison_joueurs():
             name=row["profile"]
         ))
 
-    # Réduction de l'échelle
-    fig.update_layout(
-        title="Comparaison des Profils Joueurs (Attaquant, Défenseur, Moyenne Générale)",
-        polar=dict(radialaxis=dict(visible=True, range=[0, 1.6])),
-        showlegend=True
-    )
-
-    fig.show()
+    # Conversion en JSON
+    fig_dict = fig.to_dict()
+    fig_dict = convert_ndarray(fig_dict)  # Conversion des ndarray en liste
+    return jsonify(fig_dict)
 
 @app.route('/overall_rating')
 def overall_rating():
