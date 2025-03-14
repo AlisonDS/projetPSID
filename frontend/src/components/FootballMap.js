@@ -19,7 +19,8 @@ const FootballMap = () => {
 
     return (
         <div>
-            
+        <h2>Répartition des buts par pays en Europe</h2>
+
             {plotData ? (
                 <Plot
                     data={plotData.data}      // Données pour Plotly

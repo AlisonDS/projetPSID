@@ -124,3 +124,45 @@ footer {
   color: gray;
   margin-top: 20px;
 }
+/* Conteneur pour l'analyse des résultats */
+.analysis-container {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: 20px auto;
+  text-align: left;
+}
+
+/* Mise en forme des sous-titres */
+.analysis-container h2 {
+  color: #282c34;
+  text-align: center;
+}
+
+.analysis-container h3 {
+  color: #0056b3;
+  margin-top: 15px;
+}
+
+/* Style des listes */
+.analysis-container ul {
+  padding-left: 20px;
+}
+
+.analysis-container li {
+  margin-bottom: 5px;
+  list-style: none;
+}
+
+/* Ajout d'icônes pour chaque élément de liste */
+.analysis-container li::before {
+  content: "⚽";
+  margin-right: 5px;
+}
+
+/* Pour les paragraphes */
+.analysis-container p {
+  line-height: 1.6;
+}

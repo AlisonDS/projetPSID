@@ -21,7 +21,7 @@ const PcaTeamAttributes = () => {
 
     return (
         <div >
-            <h2>Cercle des corrélations PCA</h2>
+            <h2>Cercle des corrélations ACP</h2>
             {image ? (
                 <img 
                     src={image}  // Affiche directement l'image encodée en base64

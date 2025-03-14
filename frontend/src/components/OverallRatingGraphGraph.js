@@ -19,7 +19,7 @@ const OverallRatingGraph = () => {
 
     return (
         <div>
-            <h2>Moyenne de l'Overall Rating des joueurs par Pays</h2>
+            <h2>Moyenne de la note globale des joueurs par pays</h2>
             {ratingData ? (
                 <Plot
                     data={ratingData.data}      // Données pour le bar chart
