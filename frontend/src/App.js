@@ -3,6 +3,7 @@ import FootballMap from "./components/FootballMap";
 import RepartitionDomicileExt from "./components/RepartitionDomicileExt";
 import "./App.css";
 import PcaTeamAttributes from "./components/PcaTeamAttributes";
+import PcaPosition from "./components/PcaPosition";
 
 function App() {
     return (
@@ -13,6 +14,8 @@ function App() {
             <FootballMap />
             <h1>Foot Score - Cercle des Corrélations PCA</h1>
             <PcaTeamAttributes />
+            <h1>Foot Score - ACP des équipes colorées par pays</h1>
+            <PcaPosition />
         </div>
     );
 }

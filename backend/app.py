@@ -253,7 +253,7 @@ def pca_position():
     pca_df['country'] = team_with_attributes['name']
     pca_df['team_name'] = team_with_attributes['team_short_name']
 
-    # Création du graphique interactif avec plotly
+    # Création du graphique Plotly
     fig = px.scatter(
         pca_df, 
         x='PC1', 
@@ -263,9 +263,14 @@ def pca_position():
         title="ACP des équipes colorées par pays"
     )
 
-    # Affichage
-    fig.show()
+    # Extraire les données du graphique sous forme de dictionnaire
+    plot_data = fig.to_dict()
 
+    # Appliquer la fonction convert_ndarray pour convertir tous les ndarray en listes
+    plot_data_converted = convert_ndarray(plot_data)
+
+    # Retourner les données converties dans la réponse JSON
+    return jsonify({'plotData': plot_data_converted})
 
 @app.route('/pays_age')
 def pays_age():
