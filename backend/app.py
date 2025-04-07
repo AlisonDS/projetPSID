@@ -568,20 +568,47 @@ def Bookmakers():
     return jsonify(fig_dict)
 
     # MACHINE LEARNING :
+@app.route('/api/countries')
+def get_countries():
+    # Assurer que la colonne 'country_id' existe bien
+    if 'id' in country_df.columns:
+        country_df.rename(columns={'id': 'country_id'}, inplace=True)
+
+    countries = country_df[['country_id', 'name']].dropna().to_dict(orient='records')
+    return jsonify(countries)
+
+  
 # Route pour récupérer la liste des équipes
+# @app.route('/api/teams')
+# def get_teams():
+#     teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].to_dict(orient='records')
+#     return jsonify(teams)
+
+# # MACHINE LEARNING - Version mise à jour avec seulement les variables spécifiées
+# # Préparer les données d'entraînement avec seulement les variables importantes
+# selected_features = [
+#     'buildUpPlaySpeed', 'buildUpPlayPassing', 'chanceCreationPassing', 
+#     'chanceCreationCrossing', 'chanceCreationShooting', 'defencePressure', 
+#     'defenceAggression', 'defenceTeamWidth'
+# ]
 @app.route('/api/teams')
 def get_teams():
-    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].to_dict(orient='records')
+    country_id = request.args.get('country_id')  # récupère l'ID du pays si présent
+    
+    filtered_df = team_df.copy()
+    if country_id:
+        country_id = int(country_id)
+        filtered_df = match_df[match_df['country_id'] == country_id][['home_team_api_id']].drop_duplicates()
+        team_ids = filtered_df['home_team_api_id'].unique()
+        filtered_df = team_df[team_df['team_api_id'].isin(team_ids)]
+    
+    teams = filtered_df[['team_api_id', 'team_long_name', 'team_short_name']].dropna().to_dict(orient='records')
     return jsonify(teams)
-
-# MACHINE LEARNING - Version mise à jour avec seulement les variables spécifiées
-# Préparer les données d'entraînement avec seulement les variables importantes
 selected_features = [
     'buildUpPlaySpeed', 'buildUpPlayPassing', 'chanceCreationPassing', 
     'chanceCreationCrossing', 'chanceCreationShooting', 'defencePressure', 
     'defenceAggression', 'defenceTeamWidth'
 ]
-
 # Fonction pour préparer les données d'un match
 def prepare_match_data(home_team_id, away_team_id):
     # Récupérer les attributs des équipes

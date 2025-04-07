@@ -6,19 +6,37 @@ export default function MatchPredictor() {
   const [awayTeam, setAwayTeam] = useState("");
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState("");
-
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  
   useEffect(() => {
-    fetch("/api/teams")
+    // Charger la liste des pays
+    fetch("/api/countries")
       .then((res) => res.json())
       .then((data) => {
-        console.log("Données équipes reçues :", data);
-        setTeams(data);
+        setCountries(data);
       })
-      .catch(err => {
-        console.error("Erreur lors du chargement des équipes:", err);
-        setError("Impossible de charger les équipes");
+      .catch((err) => {
+        console.error("Erreur chargement pays:", err);
+        setError("Impossible de charger les pays");
       });
   }, []);
+  
+  useEffect(() => {
+    if (!selectedCountry) return;
+    
+    fetch(`/api/teams?country_id=${selectedCountry}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Équipes filtrées :", data);
+        setTeams(data);
+      })
+      .catch((err) => {
+        console.error("Erreur chargement équipes:", err);
+        setError("Impossible de charger les équipes");
+      });
+  }, [selectedCountry]);
+  
   
   const handlePredict = async () => {
     try {
@@ -61,6 +79,28 @@ export default function MatchPredictor() {
       <h2 className="text-2xl font-bold mb-6 text-center">Prédiction de match</h2>
 
       <div className="mb-4">
+        <label className="block mb-2 font-medium">Pays</label>
+        <select
+          value={selectedCountry}
+          onChange={(e) => {
+            setSelectedCountry(e.target.value);
+            setHomeTeam("");
+            setAwayTeam("");
+            setTeams([]);
+          }}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">-- Choisir un pays --</option>
+          {countries.map((country) => (
+            <option key={country.country_id} value={country.country_id}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+
+      <div className="mb-4">
         <label className="block mb-2 font-medium">Équipe à domicile</label>
         <select
             value={homeTeam}
@@ -91,6 +131,9 @@ export default function MatchPredictor() {
             ))}
         </select>
       </div>
+    
+   
+
 
       <button
         onClick={handlePredict}
