@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
@@ -656,12 +657,21 @@ if match_data:
     X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
     _, _, y_train_away, y_test_away = train_test_split(X, y_away, test_size=0.2, random_state=42)
     
-    # Entraîner les modèles Random Forest Regressor pour prédire les scores
-    model_home = RandomForestRegressor(n_estimators=100, random_state=42)
-    model_home.fit(X_train, y_train_home)
-    
-    model_away = RandomForestRegressor(n_estimators=100, random_state=42)
-    model_away.fit(X_train, y_train_away)
+    # Entraîner les modèles Random Forest Regressor et Linear Regression pour prédire les scores
+    model_home_rf = RandomForestRegressor()
+    model_home_rf.fit(X_train, y_train_home)
+
+    model_away_rf = RandomForestRegressor()
+    model_away_rf.fit(X_train, y_train_away)
+
+    # Modèles de régression linéaire
+    model_home_lr = LinearRegression()
+    model_home_lr.fit(X_train, y_train_home)
+
+    model_away_lr = LinearRegression()
+    model_away_lr.fit(X_train, y_train_away)
+
+
 else:
     print("Erreur: Aucune donnée de match valide n'a été trouvée.")
 
@@ -677,14 +687,20 @@ def predict():
         # Préparer les données du match pour la prédiction
         match_features = prepare_match_data(home_team_id, away_team_id)
         
-        # Prédire les scores
-        predicted_home_score = max(0, round(float(model_home.predict(match_features)[0]), 1))
-        predicted_away_score = max(0, round(float(model_away.predict(match_features)[0]), 1))
+        # Prédire les scores avec Random Forest Regressor
+        predicted_home_score_rf = max(0, round(float(model_home_rf.predict(match_features)[0]), 1))
+        predicted_away_score_rf = max(0, round(float(model_away_rf.predict(match_features)[0]), 1))
+        
+        # Prédire les scores avec Linear Regression
+        predicted_home_score_lr = max(0, round(float(model_home_lr.predict(match_features)[0]), 1))
+        predicted_away_score_lr = max(0, round(float(model_away_lr.predict(match_features)[0]), 1))
         
         # Retourner les résultats de la prédiction
         return jsonify({
-            "home_score": predicted_home_score,
-            "away_score": predicted_away_score,
+            "home_score_rf": predicted_home_score_rf,
+            "away_score_rf": predicted_away_score_rf,
+            "home_score_lr": predicted_home_score_lr,
+            "away_score_lr": predicted_away_score_lr,
             "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
             "away_team_name": team_df[team_df['team_api_id'] == away_team_id]['team_long_name'].iloc[0]
         })
@@ -694,156 +710,71 @@ def predict():
             "message": "Erreur lors de la prédiction du score. Vérifiez que les équipes sélectionnées ont des données complètes."
         }), 400
 
+
 @app.route('/api/model_metrics')
 def model_metrics():
-    global X_test, y_test_home, y_test_away, model_home, model_away
+    global X_test, y_test_home, y_test_away, model_home_rf, model_away_rf, model_home_lr, model_away_lr
     
     try:
-        # Prédictions sur l'ensemble de test
-        y_pred_home = model_home.predict(X_test)
-        y_pred_away = model_away.predict(X_test)
+        # Prédictions sur l'ensemble de test avec Random Forest Regressor
+        y_pred_home_rf = model_home_rf.predict(X_test)
+        y_pred_away_rf = model_away_rf.predict(X_test)
         
-        # Calculer les métriques pour le modèle de l'équipe à domicile
-        mae_home = mean_absolute_error(y_test_home, y_pred_home)
-        mse_home = mean_squared_error(y_test_home, y_pred_home)
-        rmse_home = np.sqrt(mse_home)
-        r2_home = r2_score(y_test_home, y_pred_home)
+        # Prédictions sur l'ensemble de test avec Linear Regression
+        y_pred_home_lr = model_home_lr.predict(X_test)
+        y_pred_away_lr = model_away_lr.predict(X_test)
         
-        # Calculer les métriques pour le modèle de l'équipe à l'extérieur
-        mae_away = mean_absolute_error(y_test_away, y_pred_away)
-        mse_away = mean_squared_error(y_test_away, y_pred_away)
-        rmse_away = np.sqrt(mse_away)
-        r2_away = r2_score(y_test_away, y_pred_away)
+        # Calculer les métriques pour le modèle de l'équipe à domicile (Random Forest)
+        mae_home_rf = mean_absolute_error(y_test_home, y_pred_home_rf)
+        mse_home_rf = mean_squared_error(y_test_home, y_pred_home_rf)
+        rmse_home_rf = np.sqrt(mse_home_rf)
+        r2_home_rf = r2_score(y_test_home, y_pred_home_rf)
         
-        # Préparation de la visualisation des résultats réels vs prédictions
-        # Limiter à un échantillon pour ne pas surcharger le graphique
-        sample_size = min(100, len(y_test_home))
-        sample_indices = np.random.choice(len(y_test_home), sample_size, replace=False)
+        # Calculer les métriques pour le modèle de l'équipe à l'extérieur (Random Forest)
+        mae_away_rf = mean_absolute_error(y_test_away, y_pred_away_rf)
+        mse_away_rf = mean_squared_error(y_test_away, y_pred_away_rf)
+        rmse_away_rf = np.sqrt(mse_away_rf)
+        r2_away_rf = r2_score(y_test_away, y_pred_away_rf)
         
-        # Préparer les données pour le graphique de comparaison
-        comparison_data = {
-            'index': list(range(sample_size)),
-            'actual_home': y_test_home[sample_indices].tolist(),
-            'predicted_home': y_pred_home[sample_indices].tolist(),
-            'actual_away': y_test_away[sample_indices].tolist(),
-            'predicted_away': y_pred_away[sample_indices].tolist()
-        }
+        # Calculer les métriques pour le modèle de régression linéaire à domicile
+        mae_home_lr = mean_absolute_error(y_test_home, y_pred_home_lr)
+        mse_home_lr = mean_squared_error(y_test_home, y_pred_home_lr)
+        rmse_home_lr = np.sqrt(mse_home_lr)
+        r2_home_lr = r2_score(y_test_home, y_pred_home_lr)
         
-        # Création des graphiques Plotly
-        # 1. Graphique pour les buts à domicile
-        fig_home = px.scatter(
-            x=comparison_data['actual_home'], 
-            y=comparison_data['predicted_home'],
-            labels={'x': 'Buts réels (domicile)', 'y': 'Buts prédits (domicile)'},
-            title="Comparaison des buts réels vs prédits (équipe à domicile)"
-        )
+        # Calculer les métriques pour le modèle de régression linéaire à l'extérieur
+        mae_away_lr = mean_absolute_error(y_test_away, y_pred_away_lr)
+        mse_away_lr = mean_squared_error(y_test_away, y_pred_away_lr)
+        rmse_away_lr = np.sqrt(mse_away_lr)
+        r2_away_lr = r2_score(y_test_away, y_pred_away_lr)
         
-        # Ajouter une ligne de référence x=y pour montrer la prédiction parfaite
-        fig_home.add_trace(
-            go.Scatter(
-                x=[min(comparison_data['actual_home']), max(comparison_data['actual_home'])],
-                y=[min(comparison_data['actual_home']), max(comparison_data['actual_home'])],
-                mode='lines',
-                name='Prédiction parfaite',
-                line=dict(color='red', dash='dash')
-            )
-        )
-        
-        # 2. Graphique pour les buts à l'extérieur
-        fig_away = px.scatter(
-            x=comparison_data['actual_away'], 
-            y=comparison_data['predicted_away'],
-            labels={'x': 'Buts réels (extérieur)', 'y': 'Buts prédits (extérieur)'},
-            title="Comparaison des buts réels vs prédits (équipe à l'extérieur)"
-        )
-        
-        # Ajouter une ligne de référence x=y pour montrer la prédiction parfaite
-        fig_away.add_trace(
-            go.Scatter(
-                x=[min(comparison_data['actual_away']), max(comparison_data['actual_away'])],
-                y=[min(comparison_data['actual_away']), max(comparison_data['actual_away'])],
-                mode='lines',
-                name='Prédiction parfaite',
-                line=dict(color='red', dash='dash')
-            )
-        )
-        
-        # 3. Graphique de l'importance des variables pour le modèle domicile
-        feature_importance_home = model_home.feature_importances_
-        feature_names = X_test.columns
-        
-        importance_df_home = pd.DataFrame({
-            'feature': feature_names,
-            'importance': feature_importance_home
-        }).sort_values('importance', ascending=False)
-        
-        fig_importance_home = px.bar(
-            importance_df_home.head(10),
-            x='importance',
-            y='feature',
-            orientation='h',
-            title="Importance des variables (modèle domicile)",
-            labels={'importance': 'Importance', 'feature': 'Variable'}
-        )
-        
-        # 4. Graphique de l'importance des variables pour le modèle extérieur
-        feature_importance_away = model_away.feature_importances_
-        
-        importance_df_away = pd.DataFrame({
-            'feature': feature_names,
-            'importance': feature_importance_away
-        }).sort_values('importance', ascending=False)
-        
-        fig_importance_away = px.bar(
-            importance_df_away.head(10),
-            x='importance',
-            y='feature',
-            orientation='h',
-            title="Importance des variables (modèle extérieur)",
-            labels={'importance': 'Importance', 'feature': 'Variable'}
-        )
-        
-        # Convertir les graphiques en dictionnaires
-        fig_home_dict = convert_ndarray(fig_home.to_dict())
-        fig_away_dict = convert_ndarray(fig_away.to_dict())
-        fig_importance_home_dict = convert_ndarray(fig_importance_home.to_dict())
-        fig_importance_away_dict = convert_ndarray(fig_importance_away.to_dict())
-        
-        # Métriques générales sur le jeu de données
-        train_size = len(X_train)
-        test_size = len(X_test)
-        total_size = train_size + test_size
-        train_ratio = train_size / total_size * 100
-        test_ratio = test_size / total_size * 100
-        
-        # Retourner toutes les informations
+        # Retourner les métriques pour les deux modèles
         return jsonify({
             'metrics': {
-                'home_model': {
-                    'mae': mae_home,
-                    'mse': mse_home,
-                    'rmse': rmse_home,
-                    'r2': r2_home
+                'home_model_rf': {
+                    'mae': mae_home_rf,
+                    'mse': mse_home_rf,
+                    'rmse': rmse_home_rf,
+                    'r2': r2_home_rf
                 },
-                'away_model': {
-                    'mae': mae_away,
-                    'mse': mse_away,
-                    'rmse': rmse_away,
-                    'r2': r2_away
+                'away_model_rf': {
+                    'mae': mae_away_rf,
+                    'mse': mse_away_rf,
+                    'rmse': rmse_away_rf,
+                    'r2': r2_away_rf
+                },
+                'home_model_lr': {
+                    'mae': mae_home_lr,
+                    'mse': mse_home_lr,
+                    'rmse': rmse_home_lr,
+                    'r2': r2_home_lr
+                },
+                'away_model_lr': {
+                    'mae': mae_away_lr,
+                    'mse': mse_away_lr,
+                    'rmse': rmse_away_lr,
+                    'r2': r2_away_lr
                 }
-            },
-            'dataset_info': {
-                'train_size': train_size,
-                'test_size': test_size,
-                'total_size': total_size,
-                'train_ratio': train_ratio,
-                'test_ratio': test_ratio
-            },
-            'plots': {
-                'home_comparison': fig_home_dict,
-                'away_comparison': fig_away_dict,
-                'home_importance': fig_importance_home_dict,
-                'away_importance': fig_importance_away_dict
             }
         })
     except Exception as e:
