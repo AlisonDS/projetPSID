@@ -37,6 +37,12 @@ export default function MatchPredictor() {
       });
   }, [selectedCountry]);
   
+  // Fonction pour arrondir selon la règle spécifiée
+  const customRound = (value) => {
+    const decimal = value - Math.floor(value);
+    if (decimal === 0.5) return Math.round(value); // Cas particulier pour 0.5 (arrondi standard)
+    return decimal > 0.5 ? Math.ceil(value) : Math.floor(value);
+  };
   
   const handlePredict = async () => {
     try {
@@ -62,11 +68,18 @@ export default function MatchPredictor() {
       const data = await res.json();
       // Utiliser les données correctement selon la structure renvoyée par le backend
       console.log("Données reçues:", data);
+      
+      // Appliquer l'arrondissement personnalisé aux scores
+      const homeScore = customRound(data.home_score);
+      const awayScore = customRound(data.away_score);
+      
       setPrediction({
         homeTeamName: data.home_team_name,
         awayTeamName: data.away_team_name,
-        homeScore: data.home_score,
-        awayScore: data.away_score
+        homeScore: homeScore,
+        awayScore: awayScore,
+        rawHomeScore: data.home_score,  // Conserver les scores bruts pour affichage optionnel
+        rawAwayScore: data.away_score
       });
     } catch (error) {
       console.error("Erreur :", error);
@@ -98,7 +111,6 @@ export default function MatchPredictor() {
           ))}
         </select>
       </div>
-
 
       <div className="mb-4">
         <label className="block mb-2 font-medium">Équipe à domicile</label>
@@ -132,9 +144,6 @@ export default function MatchPredictor() {
         </select>
       </div>
     
-   
-
-
       <button
         onClick={handlePredict}
         disabled={!homeTeam || !awayTeam}
@@ -156,6 +165,9 @@ export default function MatchPredictor() {
             <div className="text-center w-2/5">
               <p className="font-medium">{prediction.homeTeamName}</p>
               <p className="text-3xl font-bold">{prediction.homeScore}</p>
+              {/* <p className="text-xs text-gray-500">
+                (Score brut: {prediction.rawHomeScore?.toFixed(2)})
+              </p> */}
             </div>
             <div className="text-center">
               <p className="text-lg font-medium">vs</p>
@@ -163,6 +175,9 @@ export default function MatchPredictor() {
             <div className="text-center w-2/5">
               <p className="font-medium">{prediction.awayTeamName}</p>
               <p className="text-3xl font-bold">{prediction.awayScore}</p>
+              {/* <p className="text-xs text-gray-500">
+                (Score brut: {prediction.rawAwayScore?.toFixed(2)})
+              </p> */}
             </div>
           </div>
         </div>
