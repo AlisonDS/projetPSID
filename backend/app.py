@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import json
 from flask_cors import CORS
 import pandas as pd
@@ -10,6 +10,8 @@ import seaborn as sns
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
 from io import BytesIO
 import base64
 import io
@@ -565,10 +567,102 @@ def Bookmakers():
     return jsonify(fig_dict)
 
     # MACHINE LEARNING :
+# Route pour récupérer la liste des équipes
 @app.route('/api/teams')
 def get_teams():
-    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].astype(str).to_dict(orient='records')
+    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].to_dict(orient='records')
     return jsonify(teams)
+
+# MACHINE LEARNING - Version mise à jour avec seulement les variables spécifiées
+# Préparer les données d'entraînement avec seulement les variables importantes
+selected_features = [
+    'buildUpPlaySpeed', 'buildUpPlayPassing', 'chanceCreationPassing', 
+    'chanceCreationCrossing', 'chanceCreationShooting', 'defencePressure', 
+    'defenceAggression', 'defenceTeamWidth'
+]
+
+# Fonction pour préparer les données d'un match
+def prepare_match_data(home_team_id, away_team_id):
+    # Récupérer les attributs des équipes
+    home_team_attr = team_attributes_df[team_attributes_df['team_api_id'] == home_team_id][selected_features].iloc[0]
+    away_team_attr = team_attributes_df[team_attributes_df['team_api_id'] == away_team_id][selected_features].iloc[0]
+    
+    # Renommer les colonnes pour distinguer domicile et extérieur
+    home_features = {f'home_{col}': val for col, val in home_team_attr.items()}
+    away_features = {f'away_{col}': val for col, val in away_team_attr.items()}
+    
+    # Combiner les caractéristiques
+    match_features = {**home_features, **away_features}
+    return pd.DataFrame([match_features])
+
+# Préparer le dataset d'entraînement
+match_data = []
+home_scores = []
+away_scores = []
+
+for idx, match in match_df.iterrows():
+    home_team_id = match['home_team_api_id']
+    away_team_id = match['away_team_api_id']
+    
+    try:
+        # Préparer les données du match
+        features = prepare_match_data(home_team_id, away_team_id)
+        match_data.append(features)
+        
+        # Ajouter les scores
+        home_scores.append(match['home_team_goal'])
+        away_scores.append(match['away_team_goal'])
+    except (IndexError, KeyError):
+        # Ignorer les matchs où les données sont manquantes
+        continue
+
+# Combiner tous les matchs en un seul DataFrame
+if match_data:
+    X = pd.concat(match_data, ignore_index=True)
+    y_home = np.array(home_scores)
+    y_away = np.array(away_scores)
+    
+    # Diviser les données en ensembles d'entraînement et de test
+    X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
+    _, _, y_train_away, y_test_away = train_test_split(X, y_away, test_size=0.2, random_state=42)
+    
+    # Entraîner les modèles Random Forest Regressor pour prédire les scores
+    model_home = RandomForestRegressor(n_estimators=100, random_state=42)
+    model_home.fit(X_train, y_train_home)
+    
+    model_away = RandomForestRegressor(n_estimators=100, random_state=42)
+    model_away.fit(X_train, y_train_away)
+else:
+    print("Erreur: Aucune donnée de match valide n'a été trouvée.")
+
+# Route pour prédire le score du match
+@app.route('/api/predict', methods=['POST'])
+def predict():
+    # Récupère les données de la requête
+    data = request.get_json()
+    home_team_id = int(data['home_team'])
+    away_team_id = int(data['away_team'])
+    
+    try:
+        # Préparer les données du match pour la prédiction
+        match_features = prepare_match_data(home_team_id, away_team_id)
+        
+        # Prédire les scores
+        predicted_home_score = max(0, round(float(model_home.predict(match_features)[0]), 1))
+        predicted_away_score = max(0, round(float(model_away.predict(match_features)[0]), 1))
+        
+        # Retourner les résultats de la prédiction
+        return jsonify({
+            "home_score": predicted_home_score,
+            "away_score": predicted_away_score,
+            "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
+            "away_team_name": team_df[team_df['team_api_id'] == away_team_id]['team_long_name'].iloc[0]
+        })
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Erreur lors de la prédiction du score. Vérifiez que les équipes sélectionnées ont des données complètes."
+        }), 400
 
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ export default function MatchPredictor() {
   const [homeTeam, setHomeTeam] = useState("");
   const [awayTeam, setAwayTeam] = useState("");
   const [prediction, setPrediction] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/teams")
@@ -12,36 +13,49 @@ export default function MatchPredictor() {
       .then((data) => {
         console.log("Données équipes reçues :", data);
         setTeams(data);
+      })
+      .catch(err => {
+        console.error("Erreur lors du chargement des équipes:", err);
+        setError("Impossible de charger les équipes");
       });
   }, []);
   
-
   const handlePredict = async () => {
     try {
+      setError("");
+      setPrediction(null);
+      
       const res = await fetch("/api/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          home_team: homeTeam, // contient le team_api_id de l'équipe à domicile
-          away_team: awayTeam, // contient le team_api_id de l'équipe à l'extérieur
+          home_team: homeTeam,
+          away_team: awayTeam,
         }),
       });
   
       if (!res.ok) {
-        throw new Error("Erreur lors de la prédiction");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Erreur lors de la prédiction");
       }
   
       const data = await res.json();
-      setPrediction(data.prediction); // data.prediction devrait contenir un string ou un label comme "2-1", "Victoire domicile", etc.
+      // Utiliser les données correctement selon la structure renvoyée par le backend
+      console.log("Données reçues:", data);
+      setPrediction({
+        homeTeamName: data.home_team_name,
+        awayTeamName: data.away_team_name,
+        homeScore: data.home_score,
+        awayScore: data.away_score
+      });
     } catch (error) {
       console.error("Erreur :", error);
-      setPrediction("Une erreur est survenue.");
+      setError(error.message || "Une erreur est survenue lors de la prédiction");
     }
   };
   
-
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow">
       <h2 className="text-2xl font-bold mb-6 text-center">Prédiction de match</h2>
@@ -60,7 +74,6 @@ export default function MatchPredictor() {
                 </option>
             ))}
         </select>
-
       </div>
 
       <div className="mb-4">
@@ -77,7 +90,6 @@ export default function MatchPredictor() {
                 </option>
             ))}
         </select>
-
       </div>
 
       <button
@@ -88,9 +100,28 @@ export default function MatchPredictor() {
         Prédire le résultat
       </button>
 
+      {error && (
+        <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
+          {error}
+        </div>
+      )}
+
       {prediction && (
-        <div className="mt-6 text-center text-lg font-semibold">
-          Résultat prédit : {prediction}
+        <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+          <h3 className="text-xl font-bold text-center mb-3">Prédiction</h3>
+          <div className="flex justify-between items-center">
+            <div className="text-center w-2/5">
+              <p className="font-medium">{prediction.homeTeamName}</p>
+              <p className="text-3xl font-bold">{prediction.homeScore}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-medium">vs</p>
+            </div>
+            <div className="text-center w-2/5">
+              <p className="font-medium">{prediction.awayTeamName}</p>
+              <p className="text-3xl font-bold">{prediction.awayScore}</p>
+            </div>
+          </div>
         </div>
       )}
     </div>
