@@ -751,25 +751,25 @@ def model_metrics():
         # Retourner les métriques pour les deux modèles
         return jsonify({
             'metrics': {
-                'home_model_rf': {
+                'home_model_lr': {
                     'mae': mae_home_rf,
                     'mse': mse_home_rf,
                     'rmse': rmse_home_rf,
                     'r2': r2_home_rf
                 },
-                'away_model_rf': {
+                'away_model_lr': {
                     'mae': mae_away_rf,
                     'mse': mse_away_rf,
                     'rmse': rmse_away_rf,
                     'r2': r2_away_rf
                 },
-                'home_model_lr': {
+                'home_model_rf': {
                     'mae': mae_home_lr,
                     'mse': mse_home_lr,
                     'rmse': rmse_home_lr,
                     'r2': r2_home_lr
                 },
-                'away_model_lr': {
+                'away_model_rf': {
                     'mae': mae_away_lr,
                     'mse': mse_away_lr,
                     'rmse': rmse_away_lr,
