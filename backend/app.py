@@ -12,6 +12,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
 import base64
 import io
@@ -664,6 +665,163 @@ def predict():
             "message": "Erreur lors de la prédiction du score. Vérifiez que les équipes sélectionnées ont des données complètes."
         }), 400
 
+@app.route('/api/model_metrics')
+def model_metrics():
+    global X_test, y_test_home, y_test_away, model_home, model_away
+    
+    try:
+        # Prédictions sur l'ensemble de test
+        y_pred_home = model_home.predict(X_test)
+        y_pred_away = model_away.predict(X_test)
+        
+        # Calculer les métriques pour le modèle de l'équipe à domicile
+        mae_home = mean_absolute_error(y_test_home, y_pred_home)
+        mse_home = mean_squared_error(y_test_home, y_pred_home)
+        rmse_home = np.sqrt(mse_home)
+        r2_home = r2_score(y_test_home, y_pred_home)
+        
+        # Calculer les métriques pour le modèle de l'équipe à l'extérieur
+        mae_away = mean_absolute_error(y_test_away, y_pred_away)
+        mse_away = mean_squared_error(y_test_away, y_pred_away)
+        rmse_away = np.sqrt(mse_away)
+        r2_away = r2_score(y_test_away, y_pred_away)
+        
+        # Préparation de la visualisation des résultats réels vs prédictions
+        # Limiter à un échantillon pour ne pas surcharger le graphique
+        sample_size = min(100, len(y_test_home))
+        sample_indices = np.random.choice(len(y_test_home), sample_size, replace=False)
+        
+        # Préparer les données pour le graphique de comparaison
+        comparison_data = {
+            'index': list(range(sample_size)),
+            'actual_home': y_test_home[sample_indices].tolist(),
+            'predicted_home': y_pred_home[sample_indices].tolist(),
+            'actual_away': y_test_away[sample_indices].tolist(),
+            'predicted_away': y_pred_away[sample_indices].tolist()
+        }
+        
+        # Création des graphiques Plotly
+        # 1. Graphique pour les buts à domicile
+        fig_home = px.scatter(
+            x=comparison_data['actual_home'], 
+            y=comparison_data['predicted_home'],
+            labels={'x': 'Buts réels (domicile)', 'y': 'Buts prédits (domicile)'},
+            title="Comparaison des buts réels vs prédits (équipe à domicile)"
+        )
+        
+        # Ajouter une ligne de référence x=y pour montrer la prédiction parfaite
+        fig_home.add_trace(
+            go.Scatter(
+                x=[min(comparison_data['actual_home']), max(comparison_data['actual_home'])],
+                y=[min(comparison_data['actual_home']), max(comparison_data['actual_home'])],
+                mode='lines',
+                name='Prédiction parfaite',
+                line=dict(color='red', dash='dash')
+            )
+        )
+        
+        # 2. Graphique pour les buts à l'extérieur
+        fig_away = px.scatter(
+            x=comparison_data['actual_away'], 
+            y=comparison_data['predicted_away'],
+            labels={'x': 'Buts réels (extérieur)', 'y': 'Buts prédits (extérieur)'},
+            title="Comparaison des buts réels vs prédits (équipe à l'extérieur)"
+        )
+        
+        # Ajouter une ligne de référence x=y pour montrer la prédiction parfaite
+        fig_away.add_trace(
+            go.Scatter(
+                x=[min(comparison_data['actual_away']), max(comparison_data['actual_away'])],
+                y=[min(comparison_data['actual_away']), max(comparison_data['actual_away'])],
+                mode='lines',
+                name='Prédiction parfaite',
+                line=dict(color='red', dash='dash')
+            )
+        )
+        
+        # 3. Graphique de l'importance des variables pour le modèle domicile
+        feature_importance_home = model_home.feature_importances_
+        feature_names = X_test.columns
+        
+        importance_df_home = pd.DataFrame({
+            'feature': feature_names,
+            'importance': feature_importance_home
+        }).sort_values('importance', ascending=False)
+        
+        fig_importance_home = px.bar(
+            importance_df_home.head(10),
+            x='importance',
+            y='feature',
+            orientation='h',
+            title="Importance des variables (modèle domicile)",
+            labels={'importance': 'Importance', 'feature': 'Variable'}
+        )
+        
+        # 4. Graphique de l'importance des variables pour le modèle extérieur
+        feature_importance_away = model_away.feature_importances_
+        
+        importance_df_away = pd.DataFrame({
+            'feature': feature_names,
+            'importance': feature_importance_away
+        }).sort_values('importance', ascending=False)
+        
+        fig_importance_away = px.bar(
+            importance_df_away.head(10),
+            x='importance',
+            y='feature',
+            orientation='h',
+            title="Importance des variables (modèle extérieur)",
+            labels={'importance': 'Importance', 'feature': 'Variable'}
+        )
+        
+        # Convertir les graphiques en dictionnaires
+        fig_home_dict = convert_ndarray(fig_home.to_dict())
+        fig_away_dict = convert_ndarray(fig_away.to_dict())
+        fig_importance_home_dict = convert_ndarray(fig_importance_home.to_dict())
+        fig_importance_away_dict = convert_ndarray(fig_importance_away.to_dict())
+        
+        # Métriques générales sur le jeu de données
+        train_size = len(X_train)
+        test_size = len(X_test)
+        total_size = train_size + test_size
+        train_ratio = train_size / total_size * 100
+        test_ratio = test_size / total_size * 100
+        
+        # Retourner toutes les informations
+        return jsonify({
+            'metrics': {
+                'home_model': {
+                    'mae': mae_home,
+                    'mse': mse_home,
+                    'rmse': rmse_home,
+                    'r2': r2_home
+                },
+                'away_model': {
+                    'mae': mae_away,
+                    'mse': mse_away,
+                    'rmse': rmse_away,
+                    'r2': r2_away
+                }
+            },
+            'dataset_info': {
+                'train_size': train_size,
+                'test_size': test_size,
+                'total_size': total_size,
+                'train_ratio': train_ratio,
+                'test_ratio': test_ratio
+            },
+            'plots': {
+                'home_comparison': fig_home_dict,
+                'away_comparison': fig_away_dict,
+                'home_importance': fig_importance_home_dict,
+                'away_importance': fig_importance_away_dict
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Erreur lors du calcul des métriques du modèle'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
