@@ -564,5 +564,12 @@ def Bookmakers():
     fig_dict = convert_ndarray(fig_dict)  # Conversion des ndarray en liste
     return jsonify(fig_dict)
 
+    # MACHINE LEARNING :
+@app.route('/api/teams')
+def get_teams():
+    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].to_dict(orient='records')
+    teams = convert_ndarray(teams)
+    return jsonify(teams)
+
 if __name__ == '__main__':
     app.run(debug=True)

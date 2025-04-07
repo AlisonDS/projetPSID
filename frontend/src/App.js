@@ -8,6 +8,7 @@ import TaillePoidsJoueurs from "./components/TaillePoids";
 import ComparaisonJoueursGraph from "./components/ComparaisonJoueursGraph";
 import OverallRatingGraph from "./components/OverallRatingGraphGraph";
 import BookmakersGraph from "./components/BookmakersGraph";
+import MatchPredictor from "./components/MatchPredictor";
 
 import "./App.css";
  
@@ -108,6 +109,12 @@ function App() {
                     </section>
                     <Footer />
                    
+                </div>
+            )}
+
+            {activeTab === "Modèle ML" && (
+                <div className="ml-container">
+                    <MatchPredictor />
                 </div>
             )}
             {/* Contenu dynamique selon le menu sélectionné */}
