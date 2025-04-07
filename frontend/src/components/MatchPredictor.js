@@ -73,14 +73,23 @@ export default function MatchPredictor() {
       const homeScore = customRound(data.home_score);
       const awayScore = customRound(data.away_score);
       
+      // setPrediction({
+      //   homeTeamName: data.home_team_name,
+      //   awayTeamName: data.away_team_name,
+      //   homeScore: homeScore,
+      //   awayScore: awayScore,
+      //   rawHomeScore: data.home_score,  // Conserver les scores bruts pour affichage optionnel
+      //   rawAwayScore: data.away_score
+      // });
       setPrediction({
         homeTeamName: data.home_team_name,
         awayTeamName: data.away_team_name,
-        homeScore: homeScore,
-        awayScore: awayScore,
-        rawHomeScore: data.home_score,  // Conserver les scores bruts pour affichage optionnel
-        rawAwayScore: data.away_score
+        homeScore: data.home_score_lr, // ou .lr si tu préfères
+        awayScore: data.away_score_lr,
+        rawHomeScore: data.home_score_rf,
+        rawAwayScore: data.away_score_rf
       });
+      
     } catch (error) {
       console.error("Erreur :", error);
       setError(error.message || "Une erreur est survenue lors de la prédiction");
