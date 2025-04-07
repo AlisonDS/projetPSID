@@ -567,9 +567,9 @@ def Bookmakers():
     # MACHINE LEARNING :
 @app.route('/api/teams')
 def get_teams():
-    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].to_dict(orient='records')
-    teams = convert_ndarray(teams)
+    teams = team_df[['team_api_id', 'team_long_name', 'team_short_name']].astype(str).to_dict(orient='records')
     return jsonify(teams)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

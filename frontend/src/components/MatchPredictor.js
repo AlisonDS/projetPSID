@@ -9,21 +9,38 @@ export default function MatchPredictor() {
   useEffect(() => {
     fetch("/api/teams")
       .then((res) => res.json())
-      .then((data) => setTeams(data));
+      .then((data) => {
+        console.log("Données équipes reçues :", data);
+        setTeams(data);
+      });
   }, []);
+  
 
   const handlePredict = async () => {
-    const res = await fetch("/api/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ home_team: homeTeam, away_team: awayTeam }),
-    });
-
-    const data = await res.json();
-    setPrediction(data.prediction);
+    try {
+      const res = await fetch("/api/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          home_team: homeTeam, // contient le team_api_id de l'équipe à domicile
+          away_team: awayTeam, // contient le team_api_id de l'équipe à l'extérieur
+        }),
+      });
+  
+      if (!res.ok) {
+        throw new Error("Erreur lors de la prédiction");
+      }
+  
+      const data = await res.json();
+      setPrediction(data.prediction); // data.prediction devrait contenir un string ou un label comme "2-1", "Victoire domicile", etc.
+    } catch (error) {
+      console.error("Erreur :", error);
+      setPrediction("Une erreur est survenue.");
+    }
   };
+  
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow">
