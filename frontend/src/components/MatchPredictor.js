@@ -70,8 +70,8 @@ export default function MatchPredictor() {
       console.log("Données reçues:", data);
       
       // Appliquer l'arrondissement personnalisé aux scores
-      const homeScore = customRound(data.home_score);
-      const awayScore = customRound(data.away_score);
+      // const homeScore = customRound(data.home_score);
+      // const awayScore = customRound(data.away_score);
       
       // setPrediction({
       //   homeTeamName: data.home_team_name,
@@ -82,12 +82,12 @@ export default function MatchPredictor() {
       //   rawAwayScore: data.away_score
       // });
       setPrediction({
-        homeTeamName: data.home_team_name,
-        awayTeamName: data.away_team_name,
-        homeScore: data.home_score_lr, // ou .lr si tu préfères
-        awayScore: data.away_score_lr,
-        rawHomeScore: data.home_score_rf,
-        rawAwayScore: data.away_score_rf
+        homeTeamName:data.home_team_name,
+        awayTeamName:data.away_team_name,
+        homeScore: customRound(data.home_score_lr), 
+        awayScore: customRound(data.away_score_lr),
+        rawHomeScore: customRound(data.home_score_rf),
+        rawAwayScore: customRound(data.away_score_rf)
       });
       
     } catch (error) {
