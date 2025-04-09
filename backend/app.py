@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, S
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
@@ -660,7 +661,7 @@ if match_data:
     # Random Forest Regressor
     model_home_rf = RandomForestRegressor(n_estimators=100, random_state=42)
     model_home_rf.fit(X_train, y_train_home)
-    
+
     # Linear Regression
     model_home_lr = LinearRegression()
     model_home_lr.fit(X_train, y_train_home)
@@ -809,11 +810,16 @@ def model_metrics():
             mse = mean_squared_error(y_true, y_pred)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_true, y_pred)
+            bias = np.mean(y_pred - y_true)
+            variance = np.var(y_pred - y_true)
+            cross_validation = cross_val_score(model, X, y_true, cv=5).mean() 
             return {
                 'mae': float(mae),
                 'mse': float(mse),
                 'rmse': float(rmse),
-                'r2': float(r2)
+                'r2': float(r2),
+                'bias': float(bias),
+                'variance': float(variance)
             }
         
         # Calculer les métriques pour tous les modèles
