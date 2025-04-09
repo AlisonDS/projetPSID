@@ -84,10 +84,10 @@ export default function MatchPredictor() {
       setPrediction({
         homeTeamName:data.home_team_name,
         awayTeamName:data.away_team_name,
-        homeScore: customRound(data.home_score_lr), 
-        awayScore: customRound(data.away_score_lr),
-        rawHomeScore: customRound(data.home_score_rf),
-        rawAwayScore: customRound(data.away_score_rf)
+        homeScore: customRound(data.home_score_stack), 
+        awayScore: customRound(data.away_score_stack)
+        // rawHomeScore: customRound(data.home_score_stack),
+        // rawAwayScore: customRound(data.away_score_stack)
       });
       
     } catch (error) {
