@@ -10,7 +10,7 @@ import seaborn as sns
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, StackingRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
@@ -630,6 +630,10 @@ match_data = []
 home_scores = []
 away_scores = []
 
+#filtrer les matchs pour ne garder que ceux de la saison 2015-2016
+match_df = match_df[match_df['season'] == '2015/2016']
+
+
 for idx, match in match_df.iterrows():
     home_team_id = match['home_team_api_id']
     away_team_id = match['away_team_api_id']
@@ -685,20 +689,6 @@ if match_data:
     # MLP Regressor
     model_home_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
     model_home_mlp.fit(X_train, y_train_home)
-    
-    # Stacking Regressor - Combinaison des modèles précédents
-    estimators_home = [
-        ('rf', RandomForestRegressor(n_estimators=100, random_state=42)),
-        ('lr', LinearRegression()),
-        ('ridge', Ridge(alpha=1.0, random_state=42)),
-        ('lasso', Lasso(alpha=0.1, random_state=42)),
-        ('gb', GradientBoostingRegressor(n_estimators=100, random_state=42))
-    ]
-    model_home_stack = StackingRegressor(
-        estimators=estimators_home,
-        final_estimator=LinearRegression()
-    )
-    model_home_stack.fit(X_train, y_train_home)
 
     # MODÈLES POUR PRÉDIRE LES BUTS À L'EXTÉRIEUR
     
@@ -729,20 +719,6 @@ if match_data:
     # MLP Regressor
     model_away_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
     model_away_mlp.fit(X_train, y_train_away)
-    
-    # Stacking Regressor - Combinaison des modèles précédents
-    estimators_away = [
-        ('rf', RandomForestRegressor(n_estimators=100, random_state=42)),
-        ('lr', LinearRegression()),
-        ('ridge', Ridge(alpha=1.0, random_state=42)),
-        ('lasso', Lasso(alpha=0.1, random_state=42)),
-        ('gb', GradientBoostingRegressor(n_estimators=100, random_state=42))
-    ]
-    model_away_stack = StackingRegressor(
-        estimators=estimators_away,
-        final_estimator=LinearRegression()
-    )
-    model_away_stack.fit(X_train, y_train_away)
 
 else:
     print("Erreur: Aucune donnée de match valide n'a été trouvée.")
@@ -769,7 +745,6 @@ def predict():
             "home_score_gb": max(0, round(float(model_home_gb.predict(match_features)[0]), 1)),
             "home_score_knn": max(0, round(float(model_home_knn.predict(match_features)[0]), 1)),
             "home_score_mlp": max(0, round(float(model_home_mlp.predict(match_features)[0]), 1)),
-            "home_score_stack": max(0, round(float(model_home_stack.predict(match_features)[0]), 1)),
             
             # Modèles pour l'équipe à l'extérieur
             "away_score_rf": max(0, round(float(model_away_rf.predict(match_features)[0]), 1)),
@@ -779,7 +754,6 @@ def predict():
             "away_score_gb": max(0, round(float(model_away_gb.predict(match_features)[0]), 1)),
             "away_score_knn": max(0, round(float(model_away_knn.predict(match_features)[0]), 1)),
             "away_score_mlp": max(0, round(float(model_away_mlp.predict(match_features)[0]), 1)),
-            "away_score_stack": max(0, round(float(model_away_stack.predict(match_features)[0]), 1)),
             
             # Informations sur les équipes
             "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
@@ -800,7 +774,7 @@ def model_metrics():
     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
-    global model_home_mlp, model_away_mlp, model_home_stack, model_away_stack
+    global model_home_mlp, model_away_mlp
     
     try:
         # Fonction pour calculer les métriques d'un modèle
@@ -832,7 +806,6 @@ def model_metrics():
             'home_model_gb': calculate_metrics(model_home_gb, X_test, y_test_home),
             'home_model_knn': calculate_metrics(model_home_knn, X_test, y_test_home),
             'home_model_mlp': calculate_metrics(model_home_mlp, X_test, y_test_home),
-            'home_model_stack': calculate_metrics(model_home_stack, X_test, y_test_home),
             
             # Métriques pour les modèles à l'extérieur
             'away_model_rf': calculate_metrics(model_away_rf, X_test, y_test_away),
@@ -842,7 +815,6 @@ def model_metrics():
             'away_model_gb': calculate_metrics(model_away_gb, X_test, y_test_away),
             'away_model_knn': calculate_metrics(model_away_knn, X_test, y_test_away),
             'away_model_mlp': calculate_metrics(model_away_mlp, X_test, y_test_away),
-            'away_model_stack': calculate_metrics(model_away_stack, X_test, y_test_away)
         }
         
         return jsonify({'metrics': metrics})

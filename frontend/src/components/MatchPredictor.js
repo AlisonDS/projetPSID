@@ -80,8 +80,8 @@ export default function MatchPredictor() {
       const data = await res.json();
       console.log("Données reçues:", data);
       
-      const homeScore = customRound(data.home_score_stack);
-      const awayScore = customRound(data.away_score_stack);
+      const homeScore = customRound(data.home_score_gb);
+      const awayScore = customRound(data.away_score_gb);
       
       const result = {
         homeTeamName: data.home_team_name,
