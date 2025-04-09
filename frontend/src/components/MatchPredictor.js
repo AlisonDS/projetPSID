@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './MatchPredictor.css'
 
 export default function MatchPredictor() {
   const [teams, setTeams] = useState([]);
@@ -97,10 +98,11 @@ export default function MatchPredictor() {
   };
   
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-6 text-center">Prédiction de match</h2>
+    <div className="match-container">
+      <h2 className="match-title">Prédiction de match</h2>
 
-      <div className="mb-4">
+
+      {/* <div className="mb-4">
         <label className="block mb-2 font-medium">Pays</label>
         <select
           value={selectedCountry}
@@ -159,7 +161,68 @@ export default function MatchPredictor() {
         className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400"
       >
         Prédire le résultat
+      </button> */}
+      <div className="select-block">
+        <label className="select-label">Pays</label>
+        <select
+          value={selectedCountry}
+          onChange={(e) => {
+            setSelectedCountry(e.target.value);
+            setHomeTeam("");
+            setAwayTeam("");
+            setTeams([]);
+          }}
+          className="select-input"
+        >
+          <option value="">-- Choisir un pays --</option>
+          {countries.map((country) => (
+            <option key={country.country_id} value={country.country_id}>
+              {country.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="select-block">
+        <label className="select-label">Équipe à domicile</label>
+        <select
+          value={homeTeam}
+          onChange={(e) => setHomeTeam(e.target.value)}
+          className="select-input"
+        >
+          <option value="">-- Choisir --</option>
+          {teams.map((team) => (
+            <option key={team.team_api_id} value={team.team_api_id}>
+              {team.team_long_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="select-block">
+        <label className="select-label">Équipe à l'extérieur</label>
+        <select
+          value={awayTeam}
+          onChange={(e) => setAwayTeam(e.target.value)}
+          className="select-input"
+        >
+          <option value="">-- Choisir --</option>
+          {teams.map((team) => (
+            <option key={team.team_api_id} value={team.team_api_id}>
+              {team.team_long_name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <button
+        onClick={handlePredict}
+        disabled={!homeTeam || !awayTeam}
+        className="predict-button"
+      >
+        Prédire le résultat
       </button>
+
 
       {error && (
         <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
@@ -168,7 +231,7 @@ export default function MatchPredictor() {
       )}
 
       {prediction && (
-        <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+        <div className="prediction-result">
           <h3 className="text-xl font-bold text-center mb-3">Prédiction</h3>
           <div className="flex justify-between items-center">
             <div className="text-center w-2/5">

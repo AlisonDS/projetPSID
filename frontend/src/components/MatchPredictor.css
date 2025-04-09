@@ -1,0 +1,124 @@
+.match-container {
+    max-width: 600px;
+    margin: 3rem auto;
+    padding: 2rem;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .match-title {
+    font-size: 2rem;
+    text-align: center;
+    font-weight: 700;
+    color: #1f4ba5;
+    margin-bottom: 2rem;
+  }
+  
+  .select-block {
+    margin-bottom: 1.5rem;
+  }
+  
+  .select-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .select-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    background-color: #f9fafb;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .select-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    outline: none;
+  }
+  
+  .predict-button {
+    width: 100%;
+    background-color: #2563eb;
+    color: white;
+    padding: 0.75rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 0.5rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .predict-button:hover {
+    background-color: #1e40af;
+    transform: scale(1.02);
+  }
+  
+  
+  .predict-button:disabled {
+    background-color: #a5b4fc;
+    cursor: not-allowed;
+  }
+  
+  .error-message {
+    margin-top: 1rem;
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+  }
+  
+  .prediction-result {
+    margin-top: 2rem;
+    background: #f3f4f6;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+  
+  .prediction-result h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  
+  .score-block {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  
+  .team-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .team-score {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+  
+  /* Animation douce d’apparition */
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      filter: blur(2px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  }
+  

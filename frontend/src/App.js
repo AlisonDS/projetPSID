@@ -395,7 +395,7 @@ function App() {
                     <span style={{ color: "blue" }}><strong> attaquants (bleu)</strong></span>, 
                     <span style={{ color: "red" }}><strong> défenseurs (rouge)</strong></span> et 
                     <span style={{ color: "green" }}><strong> moyenne générale (vert)</strong></span>. 
-                    Chaque axe représente une compétence clé, mettant en évidence les différences entre les profils.
+                    Chaque axe représente une compétence clé, mettant en évidence les différences entre les profils .
                 </p>
 
                 <h3>📊 Tendances générales</h3>
@@ -518,7 +518,6 @@ function App() {
             )}
             {activeTab === "Modèle ML" && (
                 <div className="dashboard-container">
-                    <h1>Modèle de Machine Learning</h1>
                     <Footer /> {/* Ajout du footer ici */}
                 </div>
             )}
