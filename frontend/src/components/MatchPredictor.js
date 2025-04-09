@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import './MatchPredictor.css'
+import './MatchPredictor.css';
 
 export default function MatchPredictor() {
   const [teams, setTeams] = useState([]);
@@ -9,6 +9,8 @@ export default function MatchPredictor() {
   const [error, setError] = useState("");
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [matchResult, setMatchResult] = useState(null); // 'home-win', 'away-win', ou 'draw'
+  const [showAnimation, setShowAnimation] = useState(false);
   
   useEffect(() => {
     // Charger la liste des pays
@@ -45,10 +47,19 @@ export default function MatchPredictor() {
     return decimal > 0.5 ? Math.ceil(value) : Math.floor(value);
   };
   
+  // Détermine le résultat du match
+  const determineMatchResult = (homeScore, awayScore) => {
+    if (homeScore > awayScore) return 'home-win';
+    if (awayScore > homeScore) return 'away-win';
+    return 'draw';
+  };
+  
   const handlePredict = async () => {
     try {
       setError("");
       setPrediction(null);
+      setShowAnimation(false);
+      setMatchResult(null);
       
       const res = await fetch("/api/predict", {
         method: "POST",
@@ -67,29 +78,29 @@ export default function MatchPredictor() {
       }
   
       const data = await res.json();
-      // Utiliser les données correctement selon la structure renvoyée par le backend
       console.log("Données reçues:", data);
       
-      // Appliquer l'arrondissement personnalisé aux scores
-      // const homeScore = customRound(data.home_score);
-      // const awayScore = customRound(data.away_score);
+      const homeScore = customRound(data.home_score_stack);
+      const awayScore = customRound(data.away_score_stack);
       
-      // setPrediction({
-      //   homeTeamName: data.home_team_name,
-      //   awayTeamName: data.away_team_name,
-      //   homeScore: homeScore,
-      //   awayScore: awayScore,
-      //   rawHomeScore: data.home_score,  // Conserver les scores bruts pour affichage optionnel
-      //   rawAwayScore: data.away_score
-      // });
-      setPrediction({
-        homeTeamName:data.home_team_name,
-        awayTeamName:data.away_team_name,
-        homeScore: customRound(data.home_score_stack), 
-        awayScore: customRound(data.away_score_stack)
-        // rawHomeScore: customRound(data.home_score_stack),
-        // rawAwayScore: customRound(data.away_score_stack)
-      });
+      const result = {
+        homeTeamName: data.home_team_name,
+        awayTeamName: data.away_team_name,
+        homeScore: homeScore,
+        awayScore: awayScore
+      };
+      
+      // Détermine le résultat du match
+      const resultType = determineMatchResult(homeScore, awayScore);
+      
+      // Mettre à jour l'état puis déclencher l'animation
+      setPrediction(result);
+      
+      // Attendre que le composant soit rendu avant de déclencher l'animation
+      setTimeout(() => {
+        setMatchResult(resultType);
+        setShowAnimation(true);
+      }, 300);
       
     } catch (error) {
       console.error("Erreur :", error);
@@ -101,67 +112,6 @@ export default function MatchPredictor() {
     <div className="match-container">
       <h2 className="match-title">Prédiction de match</h2>
 
-
-      {/* <div className="mb-4">
-        <label className="block mb-2 font-medium">Pays</label>
-        <select
-          value={selectedCountry}
-          onChange={(e) => {
-            setSelectedCountry(e.target.value);
-            setHomeTeam("");
-            setAwayTeam("");
-            setTeams([]);
-          }}
-          className="w-full p-2 border rounded"
-        >
-          <option value="">-- Choisir un pays --</option>
-          {countries.map((country) => (
-            <option key={country.country_id} value={country.country_id}>
-              {country.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">Équipe à domicile</label>
-        <select
-            value={homeTeam}
-            onChange={(e) => setHomeTeam(e.target.value)}
-            className="w-full p-2 border rounded"
-            >
-            <option value="">-- Choisir --</option>
-            {teams.map((team) => (
-                <option key={team.team_api_id} value={team.team_api_id}>
-                {team.team_long_name}
-                </option>
-            ))}
-        </select>
-      </div>
-
-      <div className="mb-4">
-        <label className="block mb-2 font-medium">Équipe à l'extérieur</label>
-        <select
-            value={awayTeam}
-            onChange={(e) => setAwayTeam(e.target.value)}
-            className="w-full p-2 border rounded"
-            >
-            <option value="">-- Choisir --</option>
-            {teams.map((team) => (
-                <option key={team.team_api_id} value={team.team_api_id}>
-                {team.team_long_name}
-                </option>
-            ))}
-        </select>
-      </div>
-    
-      <button
-        onClick={handlePredict}
-        disabled={!homeTeam || !awayTeam}
-        className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 disabled:bg-gray-400"
-      >
-        Prédire le résultat
-      </button> */}
       <div className="select-block">
         <label className="select-label">Pays</label>
         <select
@@ -223,33 +173,43 @@ export default function MatchPredictor() {
         Prédire le résultat
       </button>
 
-
       {error && (
-        <div className="mt-4 p-2 bg-red-100 text-red-700 rounded">
+        <div className="error-message">
           {error}
         </div>
       )}
 
       {prediction && (
-        <div className="prediction-result">
-          <h3 className="text-xl font-bold text-center mb-3">Prédiction</h3>
-          <div className="flex justify-between items-center">
-            <div className="text-center w-2/5">
-              <p className="font-medium">{prediction.homeTeamName}</p>
-              <p className="text-3xl font-bold">{prediction.homeScore}</p>
-              {/* <p className="text-xs text-gray-500">
-                (Score brut: {prediction.rawHomeScore?.toFixed(2)})
-              </p> */}
+        <div className={`prediction-result ${matchResult}`}>
+          <h3>Prédiction</h3>
+          
+          {/* Terrain de football avec cages et ballon */}
+          <div className="field-container">
+            {/* Cages de foot */}
+            <div className="goalpost goalpost-left"></div>
+            <div className="goalpost goalpost-right"></div>
+            
+            {/* Ballon de football */}
+            <div className="football"></div>
+          </div>
+          
+          <div className="score-display">
+            <div className="team-block">
+              <p className="team-name">{prediction.homeTeamName}</p>
+              <p className={`team-score ${matchResult === 'home-win' ? 'team-winner' : ''}`}>
+                {prediction.homeScore}
+              </p>
             </div>
-            <div className="text-center">
-              <p className="text-lg font-medium">vs</p>
+            
+            <div className="vs-block">
+              <p>vs</p>
             </div>
-            <div className="text-center w-2/5">
-              <p className="font-medium">{prediction.awayTeamName}</p>
-              <p className="text-3xl font-bold">{prediction.awayScore}</p>
-              {/* <p className="text-xs text-gray-500">
-                (Score brut: {prediction.rawAwayScore?.toFixed(2)})
-              </p> */}
+            
+            <div className="team-block">
+              <p className="team-name">{prediction.awayTeamName}</p>
+              <p className={`team-score ${matchResult === 'away-win' ? 'team-winner' : ''}`}>
+                {prediction.awayScore}
+              </p>
             </div>
           </div>
         </div>

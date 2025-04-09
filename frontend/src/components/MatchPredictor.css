@@ -1,124 +1,381 @@
 .match-container {
-    max-width: 600px;
-    margin: 3rem auto;
-    padding: 2rem;
-    border-radius: 1rem;
-    background: #fff;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
-    font-family: 'Segoe UI', sans-serif;
+  max-width: 600px;
+  margin: 3rem auto;
+  padding: 2rem;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.match-title {
+  font-size: 2rem;
+  text-align: center;
+  font-weight: 700;
+  color: #1f4ba5;
+  margin-bottom: 2rem;
+}
+
+.select-block {
+  margin-bottom: 1.5rem;
+}
+
+.select-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.select-input {
+  width: 100%;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  background-color: #f9fafb;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  outline: none;
+}
+
+.predict-button {
+  width: 100%;
+  background-color: #2563eb;
+  color: white;
+  padding: 0.75rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 0.5rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+
+.predict-button:hover {
+  background-color: #1e40af;
+  transform: scale(1.02);
+}
+
+.predict-button:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  margin-top: 1rem;
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.prediction-result {
+  margin-top: 2rem;
+  background: #f3f4f6;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  text-align: center;
+  animation: fadeIn 0.5s ease-in-out forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.prediction-result h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.field-container {
+  position: relative;
+  height: 120px;
+  background-color: #64a744;
+  border-radius: 10px;
+  margin: 20px 0;
+  overflow: hidden;
+}
+
+.field-container::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.field-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+}
+
+.score-display {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-top: 15px;
+}
+
+.team-block {
+  text-align: center;
+  width: 40%;
+  position: relative;
+}
+
+.vs-block {
+  text-align: center;
+  width: 20%;
+}
+
+.team-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.team-score {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Animation du ballon de football */
+@keyframes ballToRightGoal {
+  0% {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
   }
-  
-  .match-title {
-    font-size: 2rem;
-    text-align: center;
-    font-weight: 700;
-    color: #1f4ba5;
-    margin-bottom: 2rem;
+  20% {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
   }
-  
-  .select-block {
-    margin-bottom: 1.5rem;
+  80% {
+      left: 85%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(360deg) scale(0.8);
+      opacity: 1;
   }
-  
-  .select-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #444;
+  100% {
+      left: 92%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(720deg) scale(0.6);
+      opacity: 0;
   }
-  
-  .select-input {
-    width: 100%;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid #ccc;
-    font-size: 1rem;
-    background-color: #f9fafb;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@keyframes ballToLeftGoal {
+  0% {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
   }
-  
-  .select-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
-    outline: none;
+  20% {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
   }
-  
-  .predict-button {
-    width: 100%;
-    background-color: #2563eb;
-    color: white;
-    padding: 0.75rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 0.5rem;
-    transition: background 0.3s ease, transform 0.2s ease;
-    cursor: pointer;
+  80% {
+      left: 15%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(-360deg) scale(0.8);
+      opacity: 1;
   }
-  
-  .predict-button:hover {
-    background-color: #1e40af;
-    transform: scale(1.02);
+  100% {
+      left: 8%;
+      top: 50%;
+      transform: translate(-50%, -50%) rotate(-720deg) scale(0.6);
+      opacity: 0;
   }
-  
-  
-  .predict-button:disabled {
-    background-color: #a5b4fc;
-    cursor: not-allowed;
+}
+
+@keyframes ballStayMiddle {
+  0% {
+      transform: translate(-50%, -50%) scale(0.5);
+      opacity: 0;
   }
-  
-  .error-message {
-    margin-top: 1rem;
-    background: #fee2e2;
-    color: #b91c1c;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
+  20% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
   }
-  
-  .prediction-result {
-    margin-top: 2rem;
-    background: #f3f4f6;
-    padding: 1.5rem;
-    border-radius: 1rem;
-    text-align: center;
-    animation: fadeIn 0.5s ease-in-out forwards;
+  50% {
+      transform: translate(-50%, -50%) scale(1) rotate(180deg);
   }
-  
-  .prediction-result h3 {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
+  80% {
+      transform: translate(-50%, -50%) scale(1) rotate(359deg);
   }
-  
-  .score-block {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+  100% {
+      transform: translate(-50%, -50%) scale(1) rotate(720deg);
   }
-  
-  .team-name {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333;
+}
+
+.football {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-image: url("https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.home-win .football {
+  animation: ballToRightGoal 3s ease-in-out forwards;
+}
+
+.away-win .football {
+  animation: ballToLeftGoal 3s ease-in-out forwards;
+}
+
+.draw .football {
+  animation: ballStayMiddle 3s ease-in-out infinite;
+  opacity: 1;
+}
+
+.team-winner {
+  position: relative;
+}
+
+.team-winner::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 3px;
+  background-color: #2563eb;
+  border-radius: 2px;
+  animation: winnerHighlight 0.5s ease-in-out forwards;
+}
+
+@keyframes winnerHighlight {
+  0% {
+      width: 0;
+      opacity: 0;
   }
-  
-  .team-score {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #1f2937;
+  100% {
+      width: 70%;
+      opacity: 1;
   }
-  
-  /* Animation douce d’apparition */
-  @keyframes fadeIn {
-    0% {
+}
+
+/* Cages de football */
+.goalpost {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  border: 4px solid white;
+  border-bottom: 0;
+  background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.3) 2px,
+      rgba(255, 255, 255, 0.3) 4px
+  );
+  z-index: 5;
+}
+
+.goalpost::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background-color: white;
+}
+
+.goalpost::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(255, 255, 255, 0.2) 3px,
+      rgba(255, 255, 255, 0.2) 6px
+  );
+  pointer-events: none;
+}
+
+.goalpost-left {
+  left: 5px;
+  top: 30px;
+}
+
+.goalpost-right {
+  right: 5px;
+  top: 30px;
+}
+
+/* Animation de célébration pour l'équipe gagnante */
+@keyframes celebrate {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.team-winner .team-score {
+  animation: celebrate 0.5s ease-in-out 3;
+}
+
+/* Animation de la cage lorsqu'un but est marqué */
+@keyframes goalShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+.home-win .goalpost-right {
+  animation: goalShake 0.5s ease-in-out 1s;
+}
+
+.away-win .goalpost-left {
+  animation: goalShake 0.5s ease-in-out 1s;
+}
+
+/* Animation douce d'apparition */
+@keyframes fadeIn {
+  0% {
       opacity: 0;
       transform: translateY(20px) scale(0.98);
       filter: blur(2px);
-    }
-    100% {
+  }
+  100% {
       opacity: 1;
       transform: translateY(0) scale(1);
       filter: blur(0);
-    }
   }
-  
+}
