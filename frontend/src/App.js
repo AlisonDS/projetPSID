@@ -20,9 +20,9 @@ function App() {
     return (
         <div className="App">
             {/* Bandeau supérieur avec le logo */}
-            <div className="top-banner">
+            {/* <div className="top-banner">
             <img src="/logo-footscore.jpg" alt="Foot Score Logo" />
-            </div>
+            </div> */}
 
             {/* Bandeau inférieur avec le menu */}
             <nav className="navbar">
@@ -41,14 +41,38 @@ function App() {
 
             {/* Contenu dynamique */}
             <div className="content">
-                {activeTab === "Accueil" && <h1>🏠 Bienvenue sur l'Accueil</h1>}
+                {/* {activeTab === "Accueil" && <h1>🏠 Bienvenue sur l'Accueil</h1>} */}
+                {activeTab === "Accueil" && (
+  <>
+                    <div className="hero-section">
+                    <div className="hero-content">
+                        <h1 className="hero-title">⚽ Bienvenue sur Foot Score</h1>
+                        <p className="hero-text">
+                        Prédisez les scores, explorez les données, devenez un stratège du football.
+                        </p>
+                        <button className="hero-btn" onClick={() => setActiveTab("Modèle ML")}>
+                            Commencer
+                            </button>
+                    </div>
+                    <img
+                        src="/terrain.jpg"
+                        alt="Foot"
+                        className="hero-image"
+                    />
+                    </div>
+
+                    <div className="home-container">
+                    {/* le reste de ton contenu d’accueil */}
+                    </div>
+                </>
+                )}
+{/* 
                 {activeTab === "Modèle ML" && <h1>🤖 Section Modèle ML</h1>}
-                {activeTab === "Dashboard" && <h1>📊 Dashboard des statistiques</h1>}
+                {activeTab === "Dashboard" && <h1>📊 Dashboard des statistiques</h1>} */}
             </div>
 
             {activeTab === "Accueil" && (
                 <div className="home-container">
-                    <h1>📊 Projet Football Data - Prédiction des Scores</h1>
 
                     <section>
                         <h2> Contexte</h2>
