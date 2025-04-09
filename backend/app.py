@@ -10,8 +10,10 @@ import seaborn as sns
 import plotly.graph_objects as go
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, StackingRegressor
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
@@ -587,11 +589,7 @@ def get_countries():
 
 # # MACHINE LEARNING - Version mise à jour avec seulement les variables spécifiées
 # # Préparer les données d'entraînement avec seulement les variables importantes
-# selected_features = [
-#     'buildUpPlaySpeed', 'buildUpPlayPassing', 'chanceCreationPassing', 
-#     'chanceCreationCrossing', 'chanceCreationShooting', 'defencePressure', 
-#     'defenceAggression', 'defenceTeamWidth'
-# ]
+
 @app.route('/api/teams')
 def get_teams():
     country_id = request.args.get('country_id')  # récupère l'ID du pays si présent
@@ -657,20 +655,93 @@ if match_data:
     X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
     _, _, y_train_away, y_test_away = train_test_split(X, y_away, test_size=0.2, random_state=42)
     
-    # Entraîner les modèles Random Forest Regressor et Linear Regression pour prédire les scores
-    model_home_rf = RandomForestRegressor()
+    # MODÈLES POUR PRÉDIRE LES BUTS À DOMICILE
+    
+    # Random Forest Regressor
+    model_home_rf = RandomForestRegressor(n_estimators=100, random_state=42)
     model_home_rf.fit(X_train, y_train_home)
-
-    model_away_rf = RandomForestRegressor()
-    model_away_rf.fit(X_train, y_train_away)
-
-    # Modèles de régression linéaire
+    
+    # Linear Regression
     model_home_lr = LinearRegression()
     model_home_lr.fit(X_train, y_train_home)
+    
+    # Ridge Regression
+    model_home_ridge = Ridge(alpha=1.0, random_state=42)
+    model_home_ridge.fit(X_train, y_train_home)
+    
+    # Lasso Regression
+    model_home_lasso = Lasso(alpha=0.1, random_state=42)
+    model_home_lasso.fit(X_train, y_train_home)
+    
+    # Gradient Boosting Regressor
+    model_home_gb = GradientBoostingRegressor(n_estimators=100, random_state=42)
+    model_home_gb.fit(X_train, y_train_home)
+    
+    # KNeighbors Regressor
+    model_home_knn = KNeighborsRegressor(n_neighbors=5)
+    model_home_knn.fit(X_train, y_train_home)
+    
+    # MLP Regressor
+    model_home_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
+    model_home_mlp.fit(X_train, y_train_home)
+    
+    # Stacking Regressor - Combinaison des modèles précédents
+    estimators_home = [
+        ('rf', RandomForestRegressor(n_estimators=100, random_state=42)),
+        ('lr', LinearRegression()),
+        ('ridge', Ridge(alpha=1.0, random_state=42)),
+        ('lasso', Lasso(alpha=0.1, random_state=42)),
+        ('gb', GradientBoostingRegressor(n_estimators=100, random_state=42))
+    ]
+    model_home_stack = StackingRegressor(
+        estimators=estimators_home,
+        final_estimator=LinearRegression()
+    )
+    model_home_stack.fit(X_train, y_train_home)
 
+    # MODÈLES POUR PRÉDIRE LES BUTS À L'EXTÉRIEUR
+    
+    # Random Forest Regressor
+    model_away_rf = RandomForestRegressor(n_estimators=100, random_state=42)
+    model_away_rf.fit(X_train, y_train_away)
+    
+    # Linear Regression
     model_away_lr = LinearRegression()
     model_away_lr.fit(X_train, y_train_away)
-
+    
+    # Ridge Regression
+    model_away_ridge = Ridge(alpha=1.0, random_state=42)
+    model_away_ridge.fit(X_train, y_train_away)
+    
+    # Lasso Regression
+    model_away_lasso = Lasso(alpha=0.1, random_state=42)
+    model_away_lasso.fit(X_train, y_train_away)
+    
+    # Gradient Boosting Regressor
+    model_away_gb = GradientBoostingRegressor(n_estimators=100, random_state=42)
+    model_away_gb.fit(X_train, y_train_away)
+    
+    # KNeighbors Regressor
+    model_away_knn = KNeighborsRegressor(n_neighbors=5)
+    model_away_knn.fit(X_train, y_train_away)
+    
+    # MLP Regressor
+    model_away_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
+    model_away_mlp.fit(X_train, y_train_away)
+    
+    # Stacking Regressor - Combinaison des modèles précédents
+    estimators_away = [
+        ('rf', RandomForestRegressor(n_estimators=100, random_state=42)),
+        ('lr', LinearRegression()),
+        ('ridge', Ridge(alpha=1.0, random_state=42)),
+        ('lasso', Lasso(alpha=0.1, random_state=42)),
+        ('gb', GradientBoostingRegressor(n_estimators=100, random_state=42))
+    ]
+    model_away_stack = StackingRegressor(
+        estimators=estimators_away,
+        final_estimator=LinearRegression()
+    )
+    model_away_stack.fit(X_train, y_train_away)
 
 else:
     print("Erreur: Aucune donnée de match valide n'a été trouvée.")
@@ -687,23 +758,34 @@ def predict():
         # Préparer les données du match pour la prédiction
         match_features = prepare_match_data(home_team_id, away_team_id)
         
-        # Prédire les scores avec Random Forest Regressor
-        predicted_home_score_rf = max(0, round(float(model_home_rf.predict(match_features)[0]), 1))
-        predicted_away_score_rf = max(0, round(float(model_away_rf.predict(match_features)[0]), 1))
-        
-        # Prédire les scores avec Linear Regression
-        predicted_home_score_lr = max(0, round(float(model_home_lr.predict(match_features)[0]), 1))
-        predicted_away_score_lr = max(0, round(float(model_away_lr.predict(match_features)[0]), 1))
-        
-        # Retourner les résultats de la prédiction
-        return jsonify({
-            "home_score_rf": predicted_home_score_rf,
-            "away_score_rf": predicted_away_score_rf,
-            "home_score_lr": predicted_home_score_lr,
-            "away_score_lr": predicted_away_score_lr,
+        # Prédire les scores avec tous les modèles
+        predictions = {
+            # Modèles pour l'équipe à domicile
+            "home_score_rf": max(0, round(float(model_home_rf.predict(match_features)[0]), 1)),
+            "home_score_lr": max(0, round(float(model_home_lr.predict(match_features)[0]), 1)),
+            "home_score_ridge": max(0, round(float(model_home_ridge.predict(match_features)[0]), 1)),
+            "home_score_lasso": max(0, round(float(model_home_lasso.predict(match_features)[0]), 1)),
+            "home_score_gb": max(0, round(float(model_home_gb.predict(match_features)[0]), 1)),
+            "home_score_knn": max(0, round(float(model_home_knn.predict(match_features)[0]), 1)),
+            "home_score_mlp": max(0, round(float(model_home_mlp.predict(match_features)[0]), 1)),
+            "home_score_stack": max(0, round(float(model_home_stack.predict(match_features)[0]), 1)),
+            
+            # Modèles pour l'équipe à l'extérieur
+            "away_score_rf": max(0, round(float(model_away_rf.predict(match_features)[0]), 1)),
+            "away_score_lr": max(0, round(float(model_away_lr.predict(match_features)[0]), 1)),
+            "away_score_ridge": max(0, round(float(model_away_ridge.predict(match_features)[0]), 1)),
+            "away_score_lasso": max(0, round(float(model_away_lasso.predict(match_features)[0]), 1)),
+            "away_score_gb": max(0, round(float(model_away_gb.predict(match_features)[0]), 1)),
+            "away_score_knn": max(0, round(float(model_away_knn.predict(match_features)[0]), 1)),
+            "away_score_mlp": max(0, round(float(model_away_mlp.predict(match_features)[0]), 1)),
+            "away_score_stack": max(0, round(float(model_away_stack.predict(match_features)[0]), 1)),
+            
+            # Informations sur les équipes
             "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
             "away_team_name": team_df[team_df['team_api_id'] == away_team_id]['team_long_name'].iloc[0]
-        })
+        }
+        
+        return jsonify(predictions)
     except Exception as e:
         return jsonify({
             "error": str(e),
@@ -713,70 +795,51 @@ def predict():
 
 @app.route('/api/model_metrics')
 def model_metrics():
-    global X_test, y_test_home, y_test_away, model_home_rf, model_away_rf, model_home_lr, model_away_lr
+    global X_test, y_test_home, y_test_away
+    global model_home_rf, model_away_rf, model_home_lr, model_away_lr
+    global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
+    global model_home_gb, model_away_gb, model_home_knn, model_away_knn
+    global model_home_mlp, model_away_mlp, model_home_stack, model_away_stack
     
     try:
-        # Prédictions sur l'ensemble de test avec Random Forest Regressor
-        y_pred_home_rf = model_home_rf.predict(X_test)
-        y_pred_away_rf = model_away_rf.predict(X_test)
-        
-        # Prédictions sur l'ensemble de test avec Linear Regression
-        y_pred_home_lr = model_home_lr.predict(X_test)
-        y_pred_away_lr = model_away_lr.predict(X_test)
-        
-        # Calculer les métriques pour le modèle de l'équipe à domicile (Random Forest)
-        mae_home_rf = mean_absolute_error(y_test_home, y_pred_home_rf)
-        mse_home_rf = mean_squared_error(y_test_home, y_pred_home_rf)
-        rmse_home_rf = np.sqrt(mse_home_rf)
-        r2_home_rf = r2_score(y_test_home, y_pred_home_rf)
-        
-        # Calculer les métriques pour le modèle de l'équipe à l'extérieur (Random Forest)
-        mae_away_rf = mean_absolute_error(y_test_away, y_pred_away_rf)
-        mse_away_rf = mean_squared_error(y_test_away, y_pred_away_rf)
-        rmse_away_rf = np.sqrt(mse_away_rf)
-        r2_away_rf = r2_score(y_test_away, y_pred_away_rf)
-        
-        # Calculer les métriques pour le modèle de régression linéaire à domicile
-        mae_home_lr = mean_absolute_error(y_test_home, y_pred_home_lr)
-        mse_home_lr = mean_squared_error(y_test_home, y_pred_home_lr)
-        rmse_home_lr = np.sqrt(mse_home_lr)
-        r2_home_lr = r2_score(y_test_home, y_pred_home_lr)
-        
-        # Calculer les métriques pour le modèle de régression linéaire à l'extérieur
-        mae_away_lr = mean_absolute_error(y_test_away, y_pred_away_lr)
-        mse_away_lr = mean_squared_error(y_test_away, y_pred_away_lr)
-        rmse_away_lr = np.sqrt(mse_away_lr)
-        r2_away_lr = r2_score(y_test_away, y_pred_away_lr)
-        
-        # Retourner les métriques pour les deux modèles
-        return jsonify({
-            'metrics': {
-                'home_model_lr': {
-                    'mae': mae_home_rf,
-                    'mse': mse_home_rf,
-                    'rmse': rmse_home_rf,
-                    'r2': r2_home_rf
-                },
-                'away_model_lr': {
-                    'mae': mae_away_rf,
-                    'mse': mse_away_rf,
-                    'rmse': rmse_away_rf,
-                    'r2': r2_away_rf
-                },
-                'home_model_rf': {
-                    'mae': mae_home_lr,
-                    'mse': mse_home_lr,
-                    'rmse': rmse_home_lr,
-                    'r2': r2_home_lr
-                },
-                'away_model_rf': {
-                    'mae': mae_away_lr,
-                    'mse': mse_away_lr,
-                    'rmse': rmse_away_lr,
-                    'r2': r2_away_lr
-                }
+        # Fonction pour calculer les métriques d'un modèle
+        def calculate_metrics(model, X, y_true):
+            y_pred = model.predict(X)
+            mae = mean_absolute_error(y_true, y_pred)
+            mse = mean_squared_error(y_true, y_pred)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_true, y_pred)
+            return {
+                'mae': float(mae),
+                'mse': float(mse),
+                'rmse': float(rmse),
+                'r2': float(r2)
             }
-        })
+        
+        # Calculer les métriques pour tous les modèles
+        metrics = {
+            # Métriques pour les modèles à domicile
+            'home_model_rf': calculate_metrics(model_home_rf, X_test, y_test_home),
+            'home_model_lr': calculate_metrics(model_home_lr, X_test, y_test_home),
+            'home_model_ridge': calculate_metrics(model_home_ridge, X_test, y_test_home),
+            'home_model_lasso': calculate_metrics(model_home_lasso, X_test, y_test_home),
+            'home_model_gb': calculate_metrics(model_home_gb, X_test, y_test_home),
+            'home_model_knn': calculate_metrics(model_home_knn, X_test, y_test_home),
+            'home_model_mlp': calculate_metrics(model_home_mlp, X_test, y_test_home),
+            'home_model_stack': calculate_metrics(model_home_stack, X_test, y_test_home),
+            
+            # Métriques pour les modèles à l'extérieur
+            'away_model_rf': calculate_metrics(model_away_rf, X_test, y_test_away),
+            'away_model_lr': calculate_metrics(model_away_lr, X_test, y_test_away),
+            'away_model_ridge': calculate_metrics(model_away_ridge, X_test, y_test_away),
+            'away_model_lasso': calculate_metrics(model_away_lasso, X_test, y_test_away),
+            'away_model_gb': calculate_metrics(model_away_gb, X_test, y_test_away),
+            'away_model_knn': calculate_metrics(model_away_knn, X_test, y_test_away),
+            'away_model_mlp': calculate_metrics(model_away_mlp, X_test, y_test_away),
+            'away_model_stack': calculate_metrics(model_away_stack, X_test, y_test_away)
+        }
+        
+        return jsonify({'metrics': metrics})
     except Exception as e:
         return jsonify({
             'error': str(e),
