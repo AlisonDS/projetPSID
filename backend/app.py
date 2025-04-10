@@ -662,6 +662,10 @@ if match_data:
     X = pd.concat(match_data, ignore_index=True)
     y_home = np.array(home_scores)
     y_away = np.array(away_scores)
+
+    # Standardisation des variables numériques
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)  # Appliquer StandardScaler
     
     # Diviser les données en ensembles d'entraînement et de test
     X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
