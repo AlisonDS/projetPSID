@@ -14,6 +14,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
+from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -591,6 +592,11 @@ def get_countries():
 # # MACHINE LEARNING - Version mise à jour avec seulement les variables spécifiées
 # # Préparer les données d'entraînement avec seulement les variables importantes
 
+def tune_model_with_grid_search(model, param_grid, X_train, y_train):
+    grid_search = GridSearchCV(model, param_grid, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
+    grid_search.fit(X_train, y_train)
+    return grid_search.best_estimator_, grid_search.best_params_
+
 @app.route('/api/teams')
 def get_teams():
     country_id = request.args.get('country_id')  # récupère l'ID du pays si présent
@@ -659,69 +665,78 @@ if match_data:
     # Diviser les données en ensembles d'entraînement et de test
     X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
     _, _, y_train_away, y_test_away = train_test_split(X, y_away, test_size=0.2, random_state=42)
-    
-    # MODÈLES POUR PRÉDIRE LES BUTS À DOMICILE
-    
-    # Random Forest Regressor
-    model_home_rf = RandomForestRegressor(n_estimators=100, random_state=42)
-    model_home_rf.fit(X_train, y_train_home)
 
-    # Linear Regression
-    model_home_lr = LinearRegression()
-    model_home_lr.fit(X_train, y_train_home)
+    best_params_dict = {}
     
-    # Ridge Regression
-    model_home_ridge = Ridge(alpha=1.0, random_state=42)
-    model_home_ridge.fit(X_train, y_train_home)
-    
-    # Lasso Regression
-    model_home_lasso = Lasso(alpha=0.1, random_state=42)
-    model_home_lasso.fit(X_train, y_train_home)
-    
-    # Gradient Boosting Regressor
-    model_home_gb = GradientBoostingRegressor(n_estimators=100, random_state=42)
-    model_home_gb.fit(X_train, y_train_home)
-    
-    # KNeighbors Regressor
-    model_home_knn = KNeighborsRegressor(n_neighbors=5)
-    model_home_knn.fit(X_train, y_train_home)
-    
-    # MLP Regressor
-    model_home_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
-    model_home_mlp.fit(X_train, y_train_home)
+    # Random Forest Regressor avec GridSearch
+    rf_params = {'n_estimators': [100, 200],'max_depth': [None, 10, 20],'min_samples_split': [2, 5]}
+    model_home_rf, best_rf_home = tune_model_with_grid_search(RandomForestRegressor(random_state=42), rf_params, X_train, y_train_home)
+    model_away_rf, best_rf_away = tune_model_with_grid_search(RandomForestRegressor(random_state=42), rf_params, X_train, y_train_away)
+    best_params_dict['rf_home'] = best_rf_home
+    best_params_dict['rf_away'] = best_rf_away
 
-    # MODÈLES POUR PRÉDIRE LES BUTS À L'EXTÉRIEUR
-    
-    # Random Forest Regressor
-    model_away_rf = RandomForestRegressor(n_estimators=100, random_state=42)
-    model_away_rf.fit(X_train, y_train_away)
-    
-    # Linear Regression
-    model_away_lr = LinearRegression()
-    model_away_lr.fit(X_train, y_train_away)
-    
-    # Ridge Regression
-    model_away_ridge = Ridge(alpha=1.0, random_state=42)
-    model_away_ridge.fit(X_train, y_train_away)
-    
-    # Lasso Regression
-    model_away_lasso = Lasso(alpha=0.1, random_state=42)
-    model_away_lasso.fit(X_train, y_train_away)
-    
-    # Gradient Boosting Regressor
-    model_away_gb = GradientBoostingRegressor(n_estimators=100, random_state=42)
-    model_away_gb.fit(X_train, y_train_away)
-    
-    # KNeighbors Regressor
-    model_away_knn = KNeighborsRegressor(n_neighbors=5)
-    model_away_knn.fit(X_train, y_train_away)
-    
-    # MLP Regressor
-    model_away_mlp = MLPRegressor(hidden_layer_sizes=(100, 50), max_iter=1000, random_state=42)
-    model_away_mlp.fit(X_train, y_train_away)
+    # Linear Regression avec GridSearch
+    lr_params = {'fit_intercept': [True, False]}
+    model_home_lr, best_lr_home = tune_model_with_grid_search(LinearRegression(), lr_params, X_train, y_train_home)
+    model_away_lr, best_lr_away = tune_model_with_grid_search(LinearRegression(), lr_params, X_train, y_train_away)
+    best_params_dict['lr_home'] = best_lr_home
+    best_params_dict['lr_away'] = best_lr_away
 
-else:
-    print("Erreur: Aucune donnée de match valide n'a été trouvée.")
+    # Ridge Regression avec GridSearch
+    ridge_params = {'alpha': [0.01, 0.1, 1.0, 10.0]}
+    model_home_ridge, best_ridge_home = tune_model_with_grid_search(Ridge(random_state=42), ridge_params, X_train, y_train_home)
+    model_away_ridge, best_ridge_away = tune_model_with_grid_search(Ridge(random_state=42), ridge_params, X_train, y_train_away)
+    best_params_dict['ridge_home'] = best_ridge_home
+    best_params_dict['ridge_away'] = best_ridge_away
+
+    # Lasso Regression avec GridSearch
+    lasso_params = {'alpha': [0.001, 0.01, 0.1, 1.0]}
+    model_home_lasso, best_lasso_home = tune_model_with_grid_search(Lasso(random_state=42, max_iter=10000), lasso_params, X_train, y_train_home)
+    model_away_lasso, best_lasso_away = tune_model_with_grid_search(Lasso(random_state=42, max_iter=10000), lasso_params, X_train, y_train_away)
+    best_params_dict['lasso_home'] = best_lasso_home
+    best_params_dict['lasso_away'] = best_lasso_away
+
+    # Gradient Boosting Regressor avec GridSearch
+    gb_params = {'n_estimators': [100, 200],'max_depth': [3, 5],'learning_rate': [0.01, 0.1]}
+    model_home_gb, best_gb_home = tune_model_with_grid_search(GradientBoostingRegressor(random_state=42), gb_params, X_train, y_train_home)
+    model_away_gb, best_gb_away = tune_model_with_grid_search(GradientBoostingRegressor(random_state=42), gb_params, X_train, y_train_away)
+    best_params_dict['gb_home'] = best_gb_home
+    best_params_dict['gb_away'] = best_gb_away
+
+    # KNeighbors Regressor avec GridSearch
+    knn_params = {'n_neighbors': [3, 5, 7]}
+    model_home_knn, best_knn_home = tune_model_with_grid_search(KNeighborsRegressor(), knn_params, X_train, y_train_home)
+    model_away_knn, best_knn_away = tune_model_with_grid_search(KNeighborsRegressor(), knn_params, X_train, y_train_away)
+    best_params_dict['knn_home'] = best_knn_home
+    best_params_dict['knn_away'] = best_knn_away
+
+    # MLP Regressor avec GridSearch
+    mlp_params = {'hidden_layer_sizes': [(50,), (100,50), (100,100)],'activation': ['relu', 'tanh'],'learning_rate_init': [0.001, 0.01]}
+    model_home_mlp, best_mlp_home = tune_model_with_grid_search(MLPRegressor(max_iter=1000, random_state=42), mlp_params, X_train, y_train_home)
+    model_away_mlp, best_mlp_away = tune_model_with_grid_search(MLPRegressor(max_iter=1000, random_state=42), mlp_params, X_train, y_train_away)
+    best_params_dict['mlp_home'] = best_mlp_home
+    best_params_dict['mlp_away'] = best_mlp_away
+
+@app.route('/api/best-params')
+def get_best_params():
+    return jsonify(best_params_dict)
+
+
+# print("Meilleurs paramètres RF (Home):", best_rf_home)
+# print("Meilleurs paramètres RF (Away):", best_rf_away)
+# print("Meilleurs paramètres LR (Home):", best_lr_home)
+# print("Meilleurs paramètres LR (Away):", best_lr_away)
+# print("Meilleurs paramètres Ridge (Home):", best_ridge_home)
+# print("Meilleurs paramètres Ridge (Away):", best_ridge_away)
+# print("Meilleurs paramètres Lasso (Home):", best_lasso_home)
+# print("Meilleurs paramètres Lasso (Away):", best_lasso_away)
+# print("Meilleurs paramètres GB (Home):", best_gb_home)
+# print("Meilleurs paramètres GB (Away):", best_gb_away)
+# print("Meilleurs paramètres KNN (Home):", best_knn_home)
+# print("Meilleurs paramètres KNN (Away):", best_knn_away)
+# print("Meilleurs paramètres MLP (Home):", best_mlp_home)
+# print("Meilleurs paramètres MLP (Away):", best_mlp_away)
+
 
 # Route pour prédire le score du match
 @app.route('/api/predict', methods=['POST'])
