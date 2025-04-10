@@ -15,6 +15,7 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -838,6 +839,71 @@ def model_metrics():
             'error': str(e),
             'message': 'Erreur lors du calcul des métriques du modèle'
         }), 500
+
+# def model_metrics():
+#     global X_test, y_test_home, y_test_away
+#     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
+#     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
+#     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
+#     global model_home_mlp, model_away_mlp
+
+#     try :
+#         def calculate_metrics_kfold(model, X, y_true, n_splits=10):
+#             kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+#             mae_list, mse_list, rmse_list, r2_list, bias_list, variance_list = [], [], [], [], [], []
+
+#             for train_idx, test_idx in kf.split(X):
+#                 X_train_fold, X_test_fold = X.iloc[train_idx], X.iloc[test_idx]
+#                 y_train_fold, y_test_fold = y_true[train_idx], y_true[test_idx]
+                
+#                 model.fit(X_train_fold, y_train_fold)
+#                 y_pred = model.predict(X_test_fold)
+                
+#                 mae_list.append(mean_absolute_error(y_test_fold, y_pred))
+#                 mse = mean_squared_error(y_test_fold, y_pred)
+#                 mse_list.append(mse)
+#                 rmse_list.append(np.sqrt(mse))
+#                 r2_list.append(r2_score(y_test_fold, y_pred))
+#                 bias_list.append(np.mean(y_pred - y_test_fold))
+#                 variance_list.append(np.var(y_pred - y_test_fold))
+            
+#             return {
+#                 'mae': float(np.mean(mae_list)), 
+#                 'mse': float(np.mean(mse_list)),
+#                 'rmse': float(np.mean(rmse_list)),
+#                 'r2': float(np.mean(r2_list)),
+#                 'bias': float(np.mean(bias_list)),
+#                 'variance': float(np.mean(variance_list))
+#             }
+
+#             # Calculer les métriques pour tous les modèles
+#         metrics = {
+#                 # Métriques pour les modèles à domicile
+#             'home_model_rf': calculate_metrics_kfold(model_home_rf, X, y_home),
+#             'home_model_lr': calculate_metrics_kfold(model_home_lr, X, y_home),
+#             'home_model_ridge': calculate_metrics_kfold(model_home_ridge, X, y_home),
+#             'home_model_lasso': calculate_metrics_kfold(model_home_lasso, X, y_home),
+#             'home_model_gb': calculate_metrics_kfold(model_home_gb, X, y_home),
+#             'home_model_knn': calculate_metrics_kfold(model_home_knn, X, y_home),
+#             'home_model_mlp': calculate_metrics_kfold(model_home_mlp, X, y_home),
+                    
+#                     # Métriques pour les modèles à l'extérieur
+#            'away_model_rf': calculate_metrics_kfold(model_away_rf, X, y_away),
+#             'away_model_lr': calculate_metrics_kfold(model_away_lr, X, y_away),
+#             'away_model_ridge': calculate_metrics_kfold(model_away_ridge, X, y_away),
+#             'away_model_lasso': calculate_metrics_kfold(model_away_lasso, X, y_away),
+#             'away_model_gb': calculate_metrics_kfold(model_away_gb, X, y_away),
+#             'away_model_knn': calculate_metrics_kfold(model_away_knn, X, y_away),
+#             'away_model_mlp': calculate_metrics_kfold(model_away_mlp, X, y_away),
+#         }
+                
+#         return jsonify({'metrics': metrics})
+#     except Exception as e:
+#         return jsonify({
+#             'error': str(e),
+#             'message': 'Erreur lors du calcul des métriques du modèle'
+#         }), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
