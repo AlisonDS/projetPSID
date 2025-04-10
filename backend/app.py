@@ -972,6 +972,47 @@ def model_metrics_train():
 #             'message': 'Erreur lors du calcul des métriques du modèle'
 #         }), 500
 
+@app.route('/api/model_comparison_plot')
+def model_comparison_plot():
+    global X_train, y_train_home, y_train_away
+    global X_test, y_test_home, y_test_away
+    global model_home_rf, model_away_rf
+    
+    try:
+        # Prédire les valeurs pour les données d'entraînement et de test
+        y_train_pred_home_rf = model_home_rf.predict(X_train)
+        y_test_pred_home_rf = model_home_rf.predict(X_test)
+        
+        # Générer le graphique
+        plt.figure(figsize=(10, 6))
+        
+        # Afficher les résultats pour les données d'entraînement en bleu
+        plt.scatter(y_train_home, y_train_pred_home_rf, color='blue', label='Train', alpha=0.6)
+        
+        # Afficher les résultats pour les données de test en rouge
+        plt.scatter(y_test_home, y_test_pred_home_rf, color='red', label='Test', alpha=0.6)
+        
+        # Tracer la ligne de comparaison idéale (y = x)
+        plt.plot([min(y_train_home.min(), y_test_home.min()), max(y_train_home.max(), y_test_home.max())],
+                 [min(y_train_home.min(), y_test_home.min()), max(y_train_home.max(), y_test_home.max())],
+                 color='black', linestyle='--', label='Ideal (y = x)')
+        
+        # Ajouter des labels et une légende
+        plt.xlabel('Valeurs réelles')
+        plt.ylabel('Valeurs prédites')
+        plt.title('Comparaison des prédictions (Train vs Test)')
+        plt.legend()
+        
+        # Afficher le graphique dans le backend (sur le serveur ou IDE)
+        plt.show()  # Affiche le graphique directement
+
+        return jsonify({"message": "Graphique généré avec succès, il a été affiché dans le backend."})
+    
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Erreur lors de la génération du graphique'
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
