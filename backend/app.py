@@ -813,37 +813,101 @@ def model_metrics():
                 'rmse': float(rmse),
                 'r2': float(r2),
                 'bias': float(bias),
-                'variance': float(variance)
+                'variance': float(variance),
+                'cross_val_score': float(cross_validation)
             }
         
-        # Calculer les métriques pour tous les modèles
-        metrics = {
+        # Calculer les métriques pour tous les modèles sur les données de test
+        test_metrics = {
             # Métriques pour les modèles à domicile
-            'home_model_rf': calculate_metrics(model_home_rf, X_test, y_test_home),
-            'home_model_lr': calculate_metrics(model_home_lr, X_test, y_test_home),
-            'home_model_ridge': calculate_metrics(model_home_ridge, X_test, y_test_home),
-            'home_model_lasso': calculate_metrics(model_home_lasso, X_test, y_test_home),
-            'home_model_gb': calculate_metrics(model_home_gb, X_test, y_test_home),
-            'home_model_knn': calculate_metrics(model_home_knn, X_test, y_test_home),
-            'home_model_mlp': calculate_metrics(model_home_mlp, X_test, y_test_home),
+            'home_model_rf_test': calculate_metrics(model_home_rf, X_test, y_test_home),
+            'home_model_lr_test': calculate_metrics(model_home_lr, X_test, y_test_home),
+            'home_model_ridge_test': calculate_metrics(model_home_ridge, X_test, y_test_home),
+            'home_model_lasso_test': calculate_metrics(model_home_lasso, X_test, y_test_home),
+            'home_model_gb_test': calculate_metrics(model_home_gb, X_test, y_test_home),
+            'home_model_knn_test': calculate_metrics(model_home_knn, X_test, y_test_home),
+            'home_model_mlp_test': calculate_metrics(model_home_mlp, X_test, y_test_home),
             
             # Métriques pour les modèles à l'extérieur
-            'away_model_rf': calculate_metrics(model_away_rf, X_test, y_test_away),
-            'away_model_lr': calculate_metrics(model_away_lr, X_test, y_test_away),
-            'away_model_ridge': calculate_metrics(model_away_ridge, X_test, y_test_away),
-            'away_model_lasso': calculate_metrics(model_away_lasso, X_test, y_test_away),
-            'away_model_gb': calculate_metrics(model_away_gb, X_test, y_test_away),
-            'away_model_knn': calculate_metrics(model_away_knn, X_test, y_test_away),
-            'away_model_mlp': calculate_metrics(model_away_mlp, X_test, y_test_away),
+            'away_model_rf_test': calculate_metrics(model_away_rf, X_test, y_test_away),
+            'away_model_lr_test': calculate_metrics(model_away_lr, X_test, y_test_away),
+            'away_model_ridge_test': calculate_metrics(model_away_ridge, X_test, y_test_away),
+            'away_model_lasso_test': calculate_metrics(model_away_lasso, X_test, y_test_away),
+            'away_model_gb_test': calculate_metrics(model_away_gb, X_test, y_test_away),
+            'away_model_knn_test': calculate_metrics(model_away_knn, X_test, y_test_away),
+            'away_model_mlp_test': calculate_metrics(model_away_mlp, X_test, y_test_away),
         }
         
-        return jsonify({'metrics': metrics})
+        return jsonify({'metrics': test_metrics})
+    
     except Exception as e:
         return jsonify({
             'error': str(e),
-            'message': 'Erreur lors du calcul des métriques du modèle'
+            'message': 'Erreur lors du calcul des métriques du modèle pour les données de test'
         }), 500
 
+
+@app.route('/api/model_metrics_train')
+def model_metrics_train():
+    global X_train, y_train_home, y_train_away
+    global model_home_rf, model_away_rf, model_home_lr, model_away_lr
+    global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
+    global model_home_gb, model_away_gb, model_home_knn, model_away_knn
+    global model_home_mlp, model_away_mlp
+    
+    try:
+        # Fonction pour calculer les métriques d'un modèle
+        def calculate_metrics(model, X, y_true):
+            y_pred = model.predict(X)
+            mae = mean_absolute_error(y_true, y_pred)
+            mse = mean_squared_error(y_true, y_pred)
+            rmse = np.sqrt(mse)
+            r2 = r2_score(y_true, y_pred)
+            bias = np.mean(y_pred - y_true)
+            variance = np.var(y_pred - y_true)
+            cross_validation = cross_val_score(model, X, y_true, cv=5).mean() 
+            return {
+                'mae': float(mae),
+                'mse': float(mse),
+                'rmse': float(rmse),
+                'r2': float(r2),
+                'bias': float(bias),
+                'variance': float(variance),
+                'cross_val_score': float(cross_validation)
+            }
+        
+        # Calculer les métriques pour tous les modèles sur les données d'entraînement
+        train_metrics = {
+            # Métriques pour les modèles à domicile
+            'home_model_rf_train': calculate_metrics(model_home_rf, X_train, y_train_home),
+            'home_model_lr_train': calculate_metrics(model_home_lr, X_train, y_train_home),
+            'home_model_ridge_train': calculate_metrics(model_home_ridge, X_train, y_train_home),
+            'home_model_lasso_train': calculate_metrics(model_home_lasso, X_train, y_train_home),
+            'home_model_gb_train': calculate_metrics(model_home_gb, X_train, y_train_home),
+            'home_model_knn_train': calculate_metrics(model_home_knn, X_train, y_train_home),
+            'home_model_mlp_train': calculate_metrics(model_home_mlp, X_train, y_train_home),
+            
+            # Métriques pour les modèles à l'extérieur
+            'away_model_rf_train': calculate_metrics(model_away_rf, X_train, y_train_away),
+            'away_model_lr_train': calculate_metrics(model_away_lr, X_train, y_train_away),
+            'away_model_ridge_train': calculate_metrics(model_away_ridge, X_train, y_train_away),
+            'away_model_lasso_train': calculate_metrics(model_away_lasso, X_train, y_train_away),
+            'away_model_gb_train': calculate_metrics(model_away_gb, X_train, y_train_away),
+            'away_model_knn_train': calculate_metrics(model_away_knn, X_train, y_train_away),
+            'away_model_mlp_train': calculate_metrics(model_away_mlp, X_train, y_train_away),
+        }
+        
+        return jsonify({'metrics': train_metrics})
+    
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Erreur lors du calcul des métriques du modèle pour les données d\'entraînement'
+        }), 500
+
+
+
+# VALIDATION CROISEE :
 # def model_metrics():
 #     global X_test, y_test_home, y_test_away
 #     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
