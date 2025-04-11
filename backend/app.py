@@ -19,6 +19,10 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
 import base64
 import io
@@ -906,13 +910,68 @@ def model_metrics_train():
             'away_model_knn_train': calculate_metrics(model_away_knn, X_train, y_train_away),
             'away_model_mlp_train': calculate_metrics(model_away_mlp, X_train, y_train_away),
         }
-        
+       #  Modèles Keras : définition
+        def create_keras_model(input_dim):
+            model = Sequential()
+            model.add(Dense(64, activation='relu', input_dim=input_dim))
+            model.add(Dense(64, activation='relu'))
+            model.add(Dense(1))  # Prédiction score
+            model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
+            return model
+
+        model_home_keras = create_keras_model(X_train.shape[1])
+        model_away_keras = create_keras_model(X_train.shape[1])
+
+        model_home_keras.fit(X_train, y_train_home, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
+        model_away_keras.fit(X_train, y_train_away, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
+
+        # 🔹 Prédictions
+        y_pred_home_keras = model_home_keras.predict(X_train).flatten()
+        y_pred_away_keras = model_away_keras.predict(X_train).flatten()
+
+        def keras_metrics(y_true, y_pred):
+            mse = mean_squared_error(y_true, y_pred)
+            return {
+                'mae': float(mean_absolute_error(y_true, y_pred)),
+                'mse': float(mse),
+                'rmse': float(np.sqrt(mse)),
+                'r2': float(r2_score(y_true, y_pred)),
+                'bias': float(np.mean(y_pred - y_true)),
+                'variance': float(np.var(y_pred - y_true)),
+                'cross_val_score': None  # non applicable pour Keras ici
+            }
+
+        # 📊 Compilation des métriques
+        train_metrics = {
+            # sklearn - Home
+            'home_model_rf_train': calculate_metrics(model_home_rf, X_train, y_train_home),
+            'home_model_lr_train': calculate_metrics(model_home_lr, X_train, y_train_home),
+            'home_model_ridge_train': calculate_metrics(model_home_ridge, X_train, y_train_home),
+            'home_model_lasso_train': calculate_metrics(model_home_lasso, X_train, y_train_home),
+            'home_model_gb_train': calculate_metrics(model_home_gb, X_train, y_train_home),
+            'home_model_knn_train': calculate_metrics(model_home_knn, X_train, y_train_home),
+            'home_model_mlp_train': calculate_metrics(model_home_mlp, X_train, y_train_home),
+
+            # sklearn - Away
+            'away_model_rf_train': calculate_metrics(model_away_rf, X_train, y_train_away),
+            'away_model_lr_train': calculate_metrics(model_away_lr, X_train, y_train_away),
+            'away_model_ridge_train': calculate_metrics(model_away_ridge, X_train, y_train_away),
+            'away_model_lasso_train': calculate_metrics(model_away_lasso, X_train, y_train_away),
+            'away_model_gb_train': calculate_metrics(model_away_gb, X_train, y_train_away),
+            'away_model_knn_train': calculate_metrics(model_away_knn, X_train, y_train_away),
+            'away_model_mlp_train': calculate_metrics(model_away_mlp, X_train, y_train_away),
+
+            # Keras - Home & Away
+            'home_model_keras_train': keras_metrics(y_train_home, y_pred_home_keras),
+            'away_model_keras_train': keras_metrics(y_train_away, y_pred_away_keras),
+        }
+
         return jsonify({'metrics': train_metrics})
-    
+
     except Exception as e:
         return jsonify({
             'error': str(e),
-            'message': 'Erreur lors du calcul des métriques du modèle pour les données d\'entraînement'
+            'message': "Erreur lors du calcul des métriques (incluant Keras)"
         }), 500
 
 
@@ -993,7 +1052,7 @@ def model_metrics():
             'away_model_knn': calculate_metrics_kfold(model_away_knn, X, y_away),
             'away_model_mlp': calculate_metrics_kfold(model_away_mlp, X, y_away),
         }
-                
+            
         return jsonify({'metrics': metrics})
     except Exception as e:
         return jsonify({
@@ -1041,6 +1100,54 @@ def model_comparison_plot():
         return jsonify({
             'error': str(e),
             'message': 'Erreur lors de la génération du graphique'
+        }), 500
+@app.route('/api/keras_model_metrics')
+def keras_model_metrics():
+
+
+    try:
+        # Créer un modèle Keras simple
+        def create_keras_model(input_dim):
+            model = Sequential()
+            model.add(Dense(64, activation='relu', input_dim=input_dim))
+            model.add(Dense(64, activation='relu'))
+            model.add(Dense(1))  # prédiction score
+            model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
+            return model
+
+        # Créer les deux modèles (domicile et extérieur)
+        model_home = create_keras_model(X_train.shape[1])
+        model_away = create_keras_model(X_train.shape[1])
+
+        # Entraîner les modèles
+        model_home.fit(X_train, y_train_home, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
+        model_away.fit(X_train, y_train_away, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
+
+        # Prédictions
+        y_pred_home = model_home.predict(X_test).flatten()
+        y_pred_away = model_away.predict(X_test).flatten()
+
+        # Calcul des métriques
+        def compute_metrics(y_true, y_pred):
+            mse = mean_squared_error(y_true, y_pred)
+            return {
+                "mae": float(mean_absolute_error(y_true, y_pred)),
+                "mse": float(mse),
+                "rmse": float(np.sqrt(mse)),
+                "r2": float(r2_score(y_true, y_pred))
+            }
+
+        metrics = {
+            "home_model_keras": compute_metrics(y_test_home, y_pred_home),
+            "away_model_keras": compute_metrics(y_test_away, y_pred_away)
+        }
+
+        return jsonify(metrics)
+
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Erreur lors de l'entraînement ou de l'évaluation du modèle Keras"
         }), 500
 
 if __name__ == '__main__':
