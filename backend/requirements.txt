@@ -8,3 +8,5 @@ kaleido
 geopandas
 numpy
 scikit-learn
+tensorflow
+keras

@@ -19,10 +19,12 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import KFold
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from io import BytesIO
 import base64
 import io
@@ -861,6 +863,7 @@ def predict():
 #         }), 500
 
 
+
 @app.route('/api/model_metrics_train')
 def model_metrics_train():
     global X_train, y_train_home, y_train_away
@@ -868,9 +871,9 @@ def model_metrics_train():
     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
     global model_home_mlp, model_away_mlp
-    
+
     try:
-        # Fonction pour calculer les métriques d'un modèle
+        # 🔹 Fonction pour calculer les métriques classiques
         def calculate_metrics(model, X, y_true):
             y_pred = model.predict(X)
             mae = mean_absolute_error(y_true, y_pred)
@@ -879,7 +882,6 @@ def model_metrics_train():
             r2 = r2_score(y_true, y_pred)
             bias = np.mean(y_pred - y_true)
             variance = np.var(y_pred - y_true)
-            cross_validation = cross_val_score(model, X, y_true, cv=5).mean() 
             return {
                 'mae': float(mae),
                 'mse': float(mse),
@@ -887,45 +889,25 @@ def model_metrics_train():
                 'r2': float(r2),
                 'bias': float(bias),
                 'variance': float(variance),
-                'cross_val_score': float(cross_validation)
             }
-        
-        # Calculer les métriques pour tous les modèles sur les données d'entraînement
-        train_metrics = {
-            # Métriques pour les modèles à domicile
-            'home_model_rf_train': calculate_metrics(model_home_rf, X_train, y_train_home),
-            'home_model_lr_train': calculate_metrics(model_home_lr, X_train, y_train_home),
-            'home_model_ridge_train': calculate_metrics(model_home_ridge, X_train, y_train_home),
-            'home_model_lasso_train': calculate_metrics(model_home_lasso, X_train, y_train_home),
-            'home_model_gb_train': calculate_metrics(model_home_gb, X_train, y_train_home),
-            'home_model_knn_train': calculate_metrics(model_home_knn, X_train, y_train_home),
-            'home_model_mlp_train': calculate_metrics(model_home_mlp, X_train, y_train_home),
-            
-            # Métriques pour les modèles à l'extérieur
-            'away_model_rf_train': calculate_metrics(model_away_rf, X_train, y_train_away),
-            'away_model_lr_train': calculate_metrics(model_away_lr, X_train, y_train_away),
-            'away_model_ridge_train': calculate_metrics(model_away_ridge, X_train, y_train_away),
-            'away_model_lasso_train': calculate_metrics(model_away_lasso, X_train, y_train_away),
-            'away_model_gb_train': calculate_metrics(model_away_gb, X_train, y_train_away),
-            'away_model_knn_train': calculate_metrics(model_away_knn, X_train, y_train_away),
-            'away_model_mlp_train': calculate_metrics(model_away_mlp, X_train, y_train_away),
-        }
-       #  Modèles Keras : définition
+
+        # 🔹 Fonction pour construire un modèle Keras
         def create_keras_model(input_dim):
             model = Sequential()
             model.add(Dense(64, activation='relu', input_dim=input_dim))
             model.add(Dense(64, activation='relu'))
-            model.add(Dense(1))  # Prédiction score
+            model.add(Dense(1))
             model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
             return model
 
+        # 🔹 Entraînement des modèles Keras
         model_home_keras = create_keras_model(X_train.shape[1])
         model_away_keras = create_keras_model(X_train.shape[1])
 
         model_home_keras.fit(X_train, y_train_home, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
         model_away_keras.fit(X_train, y_train_away, epochs=50, batch_size=32, validation_split=0.1, verbose=0)
 
-        # 🔹 Prédictions
+        # 🔹 Prédictions Keras
         y_pred_home_keras = model_home_keras.predict(X_train).flatten()
         y_pred_away_keras = model_away_keras.predict(X_train).flatten()
 
@@ -938,12 +920,11 @@ def model_metrics_train():
                 'r2': float(r2_score(y_true, y_pred)),
                 'bias': float(np.mean(y_pred - y_true)),
                 'variance': float(np.var(y_pred - y_true)),
-                'cross_val_score': None  # non applicable pour Keras ici
             }
 
-        # 📊 Compilation des métriques
+        # 📊 Compilation de toutes les métriques
         train_metrics = {
-            # sklearn - Home
+            # 🔸 Scikit-learn - Home
             'home_model_rf_train': calculate_metrics(model_home_rf, X_train, y_train_home),
             'home_model_lr_train': calculate_metrics(model_home_lr, X_train, y_train_home),
             'home_model_ridge_train': calculate_metrics(model_home_ridge, X_train, y_train_home),
@@ -951,8 +932,9 @@ def model_metrics_train():
             'home_model_gb_train': calculate_metrics(model_home_gb, X_train, y_train_home),
             'home_model_knn_train': calculate_metrics(model_home_knn, X_train, y_train_home),
             'home_model_mlp_train': calculate_metrics(model_home_mlp, X_train, y_train_home),
+            'home_model_keras_train': keras_metrics(y_train_home, y_pred_home_keras),
 
-            # sklearn - Away
+            # 🔸 Scikit-learn - Away
             'away_model_rf_train': calculate_metrics(model_away_rf, X_train, y_train_away),
             'away_model_lr_train': calculate_metrics(model_away_lr, X_train, y_train_away),
             'away_model_ridge_train': calculate_metrics(model_away_ridge, X_train, y_train_away),
@@ -960,10 +942,9 @@ def model_metrics_train():
             'away_model_gb_train': calculate_metrics(model_away_gb, X_train, y_train_away),
             'away_model_knn_train': calculate_metrics(model_away_knn, X_train, y_train_away),
             'away_model_mlp_train': calculate_metrics(model_away_mlp, X_train, y_train_away),
-
-            # Keras - Home & Away
-            'home_model_keras_train': keras_metrics(y_train_home, y_pred_home_keras),
             'away_model_keras_train': keras_metrics(y_train_away, y_pred_away_keras),
+
+       
         }
 
         return jsonify({'metrics': train_metrics})
@@ -977,64 +958,182 @@ def model_metrics_train():
 
 
 # VALIDATION CROISEE :
+# @app.route('/api/model_metrics_kfold')
+# def model_metrics():
+#     global X_test, y_test_home, y_test_away
+#     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
+#     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
+#     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
+#     global model_home_mlp, model_away_mlp
+
+#     try :
+#         def calculate_metrics_kfold(model, X, y_true, n_splits=10):
+#             kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+#             mae_list, mse_list, rmse_list, r2_list = [], [], [], []
+            
+#             # Stocker toutes les prédictions pour calculer correctement le biais et la variance
+#             all_predictions = []
+#             all_y_true = []
+            
+#             for train_idx, test_idx in kf.split(X):
+#                 X_train_fold, X_test_fold = X.iloc[train_idx], X.iloc[test_idx]
+#                 y_train_fold, y_test_fold = y_true[train_idx], y_true[test_idx]
+                
+#                 model.fit(X_train_fold, y_train_fold)
+#                 y_pred = model.predict(X_test_fold)
+                
+#                 # Stocker les prédictions et les valeurs réelles
+#                 all_predictions.extend(y_pred)
+#                 all_y_true.extend(y_test_fold)
+                
+#                 mae_list.append(mean_absolute_error(y_test_fold, y_pred))
+#                 mse = mean_squared_error(y_test_fold, y_pred)
+#                 mse_list.append(mse)
+#                 rmse_list.append(np.sqrt(mse))
+#                 r2_list.append(r2_score(y_test_fold, y_pred))
+            
+#             # Convertir en arrays numpy pour les calculs
+#             all_predictions = np.array(all_predictions)
+#             all_y_true = np.array(all_y_true)
+            
+#             # Calcul du biais selon la formule E[f̄(x) - f(x)]
+#             # f̄(x) sont les prédictions du modèle, f(x) sont les vraies valeurs
+#             bias = np.mean(all_predictions - all_y_true)
+            
+#             # Calcul de la variance selon la formule E[(f̄(x) - E[f̄(x)])²]
+#             # E[f̄(x)] est la moyenne des prédictions
+#             expected_prediction = np.mean(all_predictions)
+#             variance = np.mean((all_predictions - expected_prediction)**2)
+            
+#             return {
+#                 'mae': float(np.mean(mae_list)), 
+#                 'mse': float(np.mean(mse_list)),
+#                 'rmse': float(np.mean(rmse_list)),
+#                 'r2': float(np.mean(r2_list)),
+#                 'bias': float(bias),
+#                 'variance': float(variance)
+#             }
+#             # Calculer les métriques pour tous les modèles
+#         metrics = {
+#                 # Métriques pour les modèles à domicile
+#             'home_model_rf': calculate_metrics_kfold(model_home_rf, X, y_home),
+#             'home_model_lr': calculate_metrics_kfold(model_home_lr, X, y_home),
+#             'home_model_ridge': calculate_metrics_kfold(model_home_ridge, X, y_home),
+#             'home_model_lasso': calculate_metrics_kfold(model_home_lasso, X, y_home),
+#             'home_model_gb': calculate_metrics_kfold(model_home_gb, X, y_home),
+#             'home_model_knn': calculate_metrics_kfold(model_home_knn, X, y_home),
+#             'home_model_mlp': calculate_metrics_kfold(model_home_mlp, X, y_home),
+                    
+#                     # Métriques pour les modèles à l'extérieur
+#            'away_model_rf': calculate_metrics_kfold(model_away_rf, X, y_away),
+#             'away_model_lr': calculate_metrics_kfold(model_away_lr, X, y_away),
+#             'away_model_ridge': calculate_metrics_kfold(model_away_ridge, X, y_away),
+#             'away_model_lasso': calculate_metrics_kfold(model_away_lasso, X, y_away),
+#             'away_model_gb': calculate_metrics_kfold(model_away_gb, X, y_away),
+#             'away_model_knn': calculate_metrics_kfold(model_away_knn, X, y_away),
+#             'away_model_mlp': calculate_metrics_kfold(model_away_mlp, X, y_away),
+#         }
+            
+#         return jsonify({'metrics': metrics})
+#     except Exception as e:
+#         return jsonify({
+#             'error': str(e),
+#             'message': 'Erreur lors du calcul des métriques du modèle'
+#         }), 500
 @app.route('/api/model_metrics_kfold')
-def model_metrics():
-    global X_test, y_test_home, y_test_away
+def model_metrics_kfold():
+    global X, y_home, y_away
     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
     global model_home_mlp, model_away_mlp
 
-    try :
+    try:
+    
         def calculate_metrics_kfold(model, X, y_true, n_splits=10):
             kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
             mae_list, mse_list, rmse_list, r2_list = [], [], [], []
-            
-            # Stocker toutes les prédictions pour calculer correctement le biais et la variance
             all_predictions = []
             all_y_true = []
-            
+
             for train_idx, test_idx in kf.split(X):
                 X_train_fold, X_test_fold = X.iloc[train_idx], X.iloc[test_idx]
                 y_train_fold, y_test_fold = y_true[train_idx], y_true[test_idx]
-                
+
                 model.fit(X_train_fold, y_train_fold)
                 y_pred = model.predict(X_test_fold)
-                
-                # Stocker les prédictions et les valeurs réelles
+
                 all_predictions.extend(y_pred)
                 all_y_true.extend(y_test_fold)
-                
+
                 mae_list.append(mean_absolute_error(y_test_fold, y_pred))
                 mse = mean_squared_error(y_test_fold, y_pred)
                 mse_list.append(mse)
                 rmse_list.append(np.sqrt(mse))
                 r2_list.append(r2_score(y_test_fold, y_pred))
-            
-            # Convertir en arrays numpy pour les calculs
+
             all_predictions = np.array(all_predictions)
             all_y_true = np.array(all_y_true)
-            
-            # Calcul du biais selon la formule E[f̄(x) - f(x)]
-            # f̄(x) sont les prédictions du modèle, f(x) sont les vraies valeurs
             bias = np.mean(all_predictions - all_y_true)
-            
-            # Calcul de la variance selon la formule E[(f̄(x) - E[f̄(x)])²]
-            # E[f̄(x)] est la moyenne des prédictions
-            expected_prediction = np.mean(all_predictions)
-            variance = np.mean((all_predictions - expected_prediction)**2)
-            
+            variance = np.var(all_predictions - all_y_true)
+
             return {
-                'mae': float(np.mean(mae_list)), 
+                'mae': float(np.mean(mae_list)),
                 'mse': float(np.mean(mse_list)),
                 'rmse': float(np.mean(rmse_list)),
                 'r2': float(np.mean(r2_list)),
                 'bias': float(bias),
                 'variance': float(variance)
             }
-            # Calculer les métriques pour tous les modèles
+
+        # 🔹 Modèle Keras pour KFold
+        def keras_model_kfold(X, y, n_splits=5):
+           
+
+            kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
+            all_predictions = []
+            all_y_true = []
+            mae_list, mse_list, rmse_list, r2_list = [], [], [], []
+
+            for train_idx, test_idx in kf.split(X):
+                X_train_fold, X_test_fold = X.iloc[train_idx], X.iloc[test_idx]
+                y_train_fold, y_test_fold = y[train_idx], y[test_idx]
+
+                model = Sequential([
+                    Dense(64, activation='relu', input_shape=(X.shape[1],)),
+                    Dense(64, activation='relu'),
+                    Dense(1)
+                ])
+                model.compile(optimizer=Adam(0.001), loss='mse', metrics=['mae'])
+
+                model.fit(X_train_fold, y_train_fold, epochs=30, batch_size=32, verbose=0)
+
+                y_pred = model.predict(X_test_fold).flatten()
+                all_predictions.extend(y_pred)
+                all_y_true.extend(y_test_fold)
+
+                mae_list.append(mean_absolute_error(y_test_fold, y_pred))
+                mse = mean_squared_error(y_test_fold, y_pred)
+                mse_list.append(mse)
+                rmse_list.append(np.sqrt(mse))
+                r2_list.append(r2_score(y_test_fold, y_pred))
+
+            all_predictions = np.array(all_predictions)
+            all_y_true = np.array(all_y_true)
+            bias = np.mean(all_predictions - all_y_true)
+            variance = np.var(all_predictions - all_y_true)
+
+            return {
+                'mae': float(np.mean(mae_list)),
+                'mse': float(np.mean(mse_list)),
+                'rmse': float(np.mean(rmse_list)),
+                'r2': float(np.mean(r2_list)),
+                'bias': float(bias),
+                'variance': float(variance)
+            }
+
         metrics = {
-                # Métriques pour les modèles à domicile
+            # sklearn - Home
             'home_model_rf': calculate_metrics_kfold(model_home_rf, X, y_home),
             'home_model_lr': calculate_metrics_kfold(model_home_lr, X, y_home),
             'home_model_ridge': calculate_metrics_kfold(model_home_ridge, X, y_home),
@@ -1042,18 +1141,23 @@ def model_metrics():
             'home_model_gb': calculate_metrics_kfold(model_home_gb, X, y_home),
             'home_model_knn': calculate_metrics_kfold(model_home_knn, X, y_home),
             'home_model_mlp': calculate_metrics_kfold(model_home_mlp, X, y_home),
-                    
-                    # Métriques pour les modèles à l'extérieur
-           'away_model_rf': calculate_metrics_kfold(model_away_rf, X, y_away),
+
+            # sklearn - Away
+            'away_model_rf': calculate_metrics_kfold(model_away_rf, X, y_away),
             'away_model_lr': calculate_metrics_kfold(model_away_lr, X, y_away),
             'away_model_ridge': calculate_metrics_kfold(model_away_ridge, X, y_away),
             'away_model_lasso': calculate_metrics_kfold(model_away_lasso, X, y_away),
             'away_model_gb': calculate_metrics_kfold(model_away_gb, X, y_away),
             'away_model_knn': calculate_metrics_kfold(model_away_knn, X, y_away),
             'away_model_mlp': calculate_metrics_kfold(model_away_mlp, X, y_away),
+
+            # keras - Home & Away
+            'home_model_keras': keras_model_kfold(X, y_home),
+            'away_model_keras': keras_model_kfold(X, y_away),
         }
-            
+
         return jsonify({'metrics': metrics})
+
     except Exception as e:
         return jsonify({
             'error': str(e),
