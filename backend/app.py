@@ -619,49 +619,173 @@ def get_teams():
     teams = filtered_df[['team_api_id', 'team_long_name', 'team_short_name']].dropna().to_dict(orient='records')
     return jsonify(teams)
 
+# Remplacer les caractéristiques d'équipe par les caractéristiques de joueurs
 selected_features = [
-    'buildUpPlaySpeed', 'buildUpPlayPassing', 'chanceCreationPassing', 
-    'chanceCreationCrossing', 'chanceCreationShooting', 'defencePressure', 
-    'defenceAggression', 'defenceTeamWidth'
+    'vision', 
+    'finishing', 
+    'potential', 
+    'volleys', 
+    'sprint_speed',  # Notez que j'ai remplacé "sprint speed" par "sprint_speed" car les noms de colonnes en Python n'ont généralement pas d'espaces
+    'shot_power', 
+    'strength',      # Correction de "strenght" à "strength"
+    'sliding_tackle'
 ]
 
-# Fonction pour préparer les données d'un match
+# Modifier la fonction prepare_match_data pour utiliser les attributs des joueurs au lieu des attributs d'équipe
 def prepare_match_data(home_team_id, away_team_id):
-    # Récupérer les attributs des équipes
-    home_team_attr = team_attributes_df[team_attributes_df['team_api_id'] == home_team_id][selected_features].iloc[0]
-    away_team_attr = team_attributes_df[team_attributes_df['team_api_id'] == away_team_id][selected_features].iloc[0]
+    # Récupérer les matchs pour les équipes domicile et extérieur
+    # Utiliser les matchs les plus récents pour chaque équipe
+    home_matches = match_df[match_df['home_team_api_id'] == home_team_id].sort_values('date', ascending=False)
+    away_matches = match_df[match_df['away_team_api_id'] == away_team_id].sort_values('date', ascending=False)
+    
+    if home_matches.empty or away_matches.empty:
+        raise ValueError("Données insuffisantes pour une ou les deux équipes sélectionnées")
+    
+    home_match = home_matches.iloc[0]
+    away_match = away_matches.iloc[0]
+    
+    # Récupérer les IDs des joueurs (11 joueurs par équipe)
+    home_player_ids = [home_match[f'home_player_{i}'] for i in range(1, 12)]
+    away_player_ids = [away_match[f'away_player_{i}'] for i in range(1, 12)] 
+    
+    # Filtrer les attributs pour ne conserver que les derniers attributs de chaque joueur
+    home_player_attrs = []
+    away_player_attrs = []
+    
+    for player_id in home_player_ids:
+        if pd.notna(player_id):  # Vérifier que l'ID n'est pas NaN
+            player_attr = player_attributes_df[player_attributes_df['player_api_id'] == player_id]
+            if not player_attr.empty:
+                # Prendre les attributs les plus récents
+                latest_attr = player_attr.sort_values('date').iloc[-1][selected_features]
+                home_player_attrs.append(latest_attr)
+    
+    for player_id in away_player_ids:
+        if pd.notna(player_id):  # Vérifier que l'ID n'est pas NaN
+            player_attr = player_attributes_df[player_attributes_df['player_api_id'] == player_id]
+            if not player_attr.empty:
+                # Prendre les attributs les plus récents
+                latest_attr = player_attr.sort_values('date').iloc[-1][selected_features]
+                away_player_attrs.append(latest_attr)
+    
+    # Calculer la moyenne des attributs pour chaque équipe
+    if home_player_attrs:
+        home_attrs_mean = pd.concat(home_player_attrs, axis=1).T.mean()
+    else:
+        # Si aucun attribut n'est disponible, remplir avec des zéros
+        home_attrs_mean = pd.Series(0, index=selected_features)
+    
+    if away_player_attrs:
+        away_attrs_mean = pd.concat(away_player_attrs, axis=1).T.mean()
+    else:
+        # Si aucun attribut n'est disponible, remplir avec des zéros
+        away_attrs_mean = pd.Series(0, index=selected_features)
     
     # Renommer les colonnes pour distinguer domicile et extérieur
-    home_features = {f'home_{col}': val for col, val in home_team_attr.items()}
-    away_features = {f'away_{col}': val for col, val in away_team_attr.items()}
+    home_features = {f'home_{col}': val for col, val in home_attrs_mean.items()}
+    away_features = {f'away_{col}': val for col, val in away_attrs_mean.items()}
     
     # Combiner les caractéristiques
     match_features = {**home_features, **away_features}
     return pd.DataFrame([match_features])
 
-# Préparer le dataset d'entraînement
+# Mise à jour de la fonction prepare_match_data pour l'API de prédiction
+@app.route('/api/predict', methods=['POST'])
+def predict():
+    # Récupère les données de la requête
+    data = request.get_json()
+    home_team_id = int(data['home_team'])
+    away_team_id = int(data['away_team'])
+    
+    try:
+        # Préparer les données du match pour la prédiction avec la nouvelle fonction
+        match_features = prepare_match_data(home_team_id, away_team_id)
+        
+        # Prédire les scores avec tous les modèles
+        predictions = {
+            # Modèles pour l'équipe à domicile
+            "home_score_rf": max(0, round(float(model_home_rf.predict(match_features)[0]), 1)),
+            "home_score_lr": max(0, round(float(model_home_lr.predict(match_features)[0]), 1)),
+            "home_score_ridge": max(0, round(float(model_home_ridge.predict(match_features)[0]), 1)),
+            "home_score_lasso": max(0, round(float(model_home_lasso.predict(match_features)[0]), 1)),
+            "home_score_gb": max(0, round(float(model_home_gb.predict(match_features)[0]), 1)),
+            "home_score_knn": max(0, round(float(model_home_knn.predict(match_features)[0]), 1)),
+            "home_score_mlp": max(0, round(float(model_home_mlp.predict(match_features)[0]), 1)),
+            
+            # Modèles pour l'équipe à l'extérieur
+            "away_score_rf": max(0, round(float(model_away_rf.predict(match_features)[0]), 1)),
+            "away_score_lr": max(0, round(float(model_away_lr.predict(match_features)[0]), 1)),
+            "away_score_ridge": max(0, round(float(model_away_ridge.predict(match_features)[0]), 1)),
+            "away_score_lasso": max(0, round(float(model_away_lasso.predict(match_features)[0]), 1)),
+            "away_score_gb": max(0, round(float(model_away_gb.predict(match_features)[0]), 1)),
+            "away_score_knn": max(0, round(float(model_away_knn.predict(match_features)[0]), 1)),
+            "away_score_mlp": max(0, round(float(model_away_mlp.predict(match_features)[0]), 1)),
+            
+            # Informations sur les équipes
+            "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
+            "away_team_name": team_df[team_df['team_api_id'] == away_team_id]['team_long_name'].iloc[0]
+        }
+        
+        return jsonify(predictions)
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "message": "Erreur lors de la prédiction du score. Vérifiez que les équipes sélectionnées ont des données complètes."
+        }), 400
+
+# Mise à jour du code de préparation des données d'entraînement
+# Préparer le dataset d'entraînement avec les nouvelles caractéristiques de joueurs
 match_data = []
 home_scores = []
 away_scores = []
 
-#filtrer les matchs pour ne garder que ceux de la saison 2015-2016
-match_df = match_df[match_df['season'] == '2015/2016']
-
+# Filtrer les matchs pour ne garder que ceux de la saison 2013/2014 à 2015/2016
+match_df = match_df[match_df['season'].isin(['2013/2014', '2014/2015', '2015/2016'])]
 
 for idx, match in match_df.iterrows():
     home_team_id = match['home_team_api_id']
     away_team_id = match['away_team_api_id']
     
     try:
-        # Préparer les données du match
-        features = prepare_match_data(home_team_id, away_team_id)
-        match_data.append(features)
+        # Récupérer les IDs des joueurs
+        home_player_ids = [match[f'home_player_{i}'] for i in range(1, 12) if pd.notna(match[f'home_player_{i}'])]
+        away_player_ids = [match[f'away_player_{i}'] for i in range(1, 12) if pd.notna(match[f'away_player_{i}'])]
         
-        # Ajouter les scores
-        home_scores.append(match['home_team_goal'])
-        away_scores.append(match['away_team_goal'])
-    except (IndexError, KeyError):
-        # Ignorer les matchs où les données sont manquantes
+        # Récupérer les attributs des joueurs
+        home_player_attrs = []
+        for player_id in home_player_ids:
+            player_attr = player_attributes_df[player_attributes_df['player_api_id'] == player_id]
+            if not player_attr.empty:
+                latest_attr = player_attr.sort_values('date').iloc[-1][selected_features]
+                home_player_attrs.append(latest_attr)
+        
+        away_player_attrs = []
+        for player_id in away_player_ids:
+            player_attr = player_attributes_df[player_attributes_df['player_api_id'] == player_id]
+            if not player_attr.empty:
+                latest_attr = player_attr.sort_values('date').iloc[-1][selected_features]
+                away_player_attrs.append(latest_attr)
+        
+        # S'assurer qu'il y a des données pour les deux équipes
+        if home_player_attrs and away_player_attrs:
+            # Calculer la moyenne des attributs pour chaque équipe
+            home_attrs_mean = pd.concat(home_player_attrs, axis=1).T.mean()
+            away_attrs_mean = pd.concat(away_player_attrs, axis=1).T.mean()
+            
+            # Créer un dictionnaire avec les caractéristiques
+            home_features = {f'home_{col}': val for col, val in home_attrs_mean.items()}
+            away_features = {f'away_{col}': val for col, val in away_attrs_mean.items()}
+            match_features = {**home_features, **away_features}
+            
+            # Ajouter les données au dataset
+            match_data.append(pd.DataFrame([match_features]))
+            
+            # Ajouter les scores
+            home_scores.append(match['home_team_goal'])
+            away_scores.append(match['away_team_goal'])
+    except Exception as e:
+        # Ignorer les matchs où les données sont manquantes ou en cas d'erreur
+        print(f"Erreur pour le match {idx}: {e}")
         continue
 
 # Combiner tous les matchs en un seul DataFrame
@@ -672,12 +796,11 @@ if match_data:
 
     # Standardisation des variables numériques
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)  # Appliquer StandardScaler
+    X_scaled = scaler.fit_transform(X)
     
     # Diviser les données en ensembles d'entraînement et de test
     X_train, X_test, y_train_home, y_test_home = train_test_split(X, y_home, test_size=0.2, random_state=42)
     _, _, y_train_away, y_test_away = train_test_split(X, y_away, test_size=0.2, random_state=42)
-
     best_params_dict = {}
     
     # Random Forest Regressor avec GridSearch
@@ -732,68 +855,6 @@ if match_data:
 @app.route('/api/best-params')
 def get_best_params():
     return jsonify(best_params_dict)
-
-
-# print("Meilleurs paramètres RF (Home):", best_rf_home)
-# print("Meilleurs paramètres RF (Away):", best_rf_away)
-# print("Meilleurs paramètres LR (Home):", best_lr_home)
-# print("Meilleurs paramètres LR (Away):", best_lr_away)
-# print("Meilleurs paramètres Ridge (Home):", best_ridge_home)
-# print("Meilleurs paramètres Ridge (Away):", best_ridge_away)
-# print("Meilleurs paramètres Lasso (Home):", best_lasso_home)
-# print("Meilleurs paramètres Lasso (Away):", best_lasso_away)
-# print("Meilleurs paramètres GB (Home):", best_gb_home)
-# print("Meilleurs paramètres GB (Away):", best_gb_away)
-# print("Meilleurs paramètres KNN (Home):", best_knn_home)
-# print("Meilleurs paramètres KNN (Away):", best_knn_away)
-# print("Meilleurs paramètres MLP (Home):", best_mlp_home)
-# print("Meilleurs paramètres MLP (Away):", best_mlp_away)
-
-
-# Route pour prédire le score du match
-@app.route('/api/predict', methods=['POST'])
-def predict():
-    # Récupère les données de la requête
-    data = request.get_json()
-    home_team_id = int(data['home_team'])
-    away_team_id = int(data['away_team'])
-    
-    try:
-        # Préparer les données du match pour la prédiction
-        match_features = prepare_match_data(home_team_id, away_team_id)
-        
-        # Prédire les scores avec tous les modèles
-        predictions = {
-            # Modèles pour l'équipe à domicile
-            "home_score_rf": max(0, round(float(model_home_rf.predict(match_features)[0]), 1)),
-            "home_score_lr": max(0, round(float(model_home_lr.predict(match_features)[0]), 1)),
-            "home_score_ridge": max(0, round(float(model_home_ridge.predict(match_features)[0]), 1)),
-            "home_score_lasso": max(0, round(float(model_home_lasso.predict(match_features)[0]), 1)),
-            "home_score_gb": max(0, round(float(model_home_gb.predict(match_features)[0]), 1)),
-            "home_score_knn": max(0, round(float(model_home_knn.predict(match_features)[0]), 1)),
-            "home_score_mlp": max(0, round(float(model_home_mlp.predict(match_features)[0]), 1)),
-            
-            # Modèles pour l'équipe à l'extérieur
-            "away_score_rf": max(0, round(float(model_away_rf.predict(match_features)[0]), 1)),
-            "away_score_lr": max(0, round(float(model_away_lr.predict(match_features)[0]), 1)),
-            "away_score_ridge": max(0, round(float(model_away_ridge.predict(match_features)[0]), 1)),
-            "away_score_lasso": max(0, round(float(model_away_lasso.predict(match_features)[0]), 1)),
-            "away_score_gb": max(0, round(float(model_away_gb.predict(match_features)[0]), 1)),
-            "away_score_knn": max(0, round(float(model_away_knn.predict(match_features)[0]), 1)),
-            "away_score_mlp": max(0, round(float(model_away_mlp.predict(match_features)[0]), 1)),
-            
-            # Informations sur les équipes
-            "home_team_name": team_df[team_df['team_api_id'] == home_team_id]['team_long_name'].iloc[0],
-            "away_team_name": team_df[team_df['team_api_id'] == away_team_id]['team_long_name'].iloc[0]
-        }
-        
-        return jsonify(predictions)
-    except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "message": "Erreur lors de la prédiction du score. Vérifiez que les équipes sélectionnées ont des données complètes."
-        }), 400
-
 
 # @app.route('/api/model_metrics')
 # def model_metrics():
@@ -867,22 +928,33 @@ def predict():
 
 @app.route('/api/model_metrics_train')
 def model_metrics_train():
-    global X_train, y_train_home, y_train_away
+    global X_test, y_test_home, y_test_away
     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
     global model_home_mlp, model_away_mlp
-
+    
     try:
-        # 🔹 Fonction pour calculer les métriques classiques
+        # Fonction pour calculer les métriques d'un modèle
         def calculate_metrics(model, X, y_true):
             y_pred = model.predict(X)
+            
+            # Métriques standard
             mae = mean_absolute_error(y_true, y_pred)
             mse = mean_squared_error(y_true, y_pred)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_true, y_pred)
+            
+            # Biais: E[f̂(x^) - f(x)]
             bias = np.mean(y_pred - y_true)
-            variance = np.var(y_pred - y_true)
+            
+            # Variance: E[(f̂(x^) - E[f̂(x^)])²]
+            expected_prediction = np.mean(y_pred)
+            variance = np.mean((y_pred - expected_prediction) ** 2)
+            
+            # Variance des valeurs réelles pour référence
+            variance_true = np.var(y_true)
+            
             return {
                 'mae': float(mae),
                 'mse': float(mse),
@@ -890,6 +962,7 @@ def model_metrics_train():
                 'r2': float(r2),
                 'bias': float(bias),
                 'variance': float(variance),
+                'variance_true': float(variance_true)
             }
 
         # 🔹 Fonction pour construire un modèle Keras
@@ -956,91 +1029,6 @@ def model_metrics_train():
             'message': "Erreur lors du calcul des métriques (incluant Keras)"
         }), 500
 
-
-
-# VALIDATION CROISEE :
-# @app.route('/api/model_metrics_kfold')
-# def model_metrics():
-#     global X_test, y_test_home, y_test_away
-#     global model_home_rf, model_away_rf, model_home_lr, model_away_lr
-#     global model_home_ridge, model_away_ridge, model_home_lasso, model_away_lasso
-#     global model_home_gb, model_away_gb, model_home_knn, model_away_knn
-#     global model_home_mlp, model_away_mlp
-
-#     try :
-#         def calculate_metrics_kfold(model, X, y_true, n_splits=10):
-#             kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
-#             mae_list, mse_list, rmse_list, r2_list = [], [], [], []
-            
-#             # Stocker toutes les prédictions pour calculer correctement le biais et la variance
-#             all_predictions = []
-#             all_y_true = []
-            
-#             for train_idx, test_idx in kf.split(X):
-#                 X_train_fold, X_test_fold = X.iloc[train_idx], X.iloc[test_idx]
-#                 y_train_fold, y_test_fold = y_true[train_idx], y_true[test_idx]
-                
-#                 model.fit(X_train_fold, y_train_fold)
-#                 y_pred = model.predict(X_test_fold)
-                
-#                 # Stocker les prédictions et les valeurs réelles
-#                 all_predictions.extend(y_pred)
-#                 all_y_true.extend(y_test_fold)
-                
-#                 mae_list.append(mean_absolute_error(y_test_fold, y_pred))
-#                 mse = mean_squared_error(y_test_fold, y_pred)
-#                 mse_list.append(mse)
-#                 rmse_list.append(np.sqrt(mse))
-#                 r2_list.append(r2_score(y_test_fold, y_pred))
-            
-#             # Convertir en arrays numpy pour les calculs
-#             all_predictions = np.array(all_predictions)
-#             all_y_true = np.array(all_y_true)
-            
-#             # Calcul du biais selon la formule E[f̄(x) - f(x)]
-#             # f̄(x) sont les prédictions du modèle, f(x) sont les vraies valeurs
-#             bias = np.mean(all_predictions - all_y_true)
-            
-#             # Calcul de la variance selon la formule E[(f̄(x) - E[f̄(x)])²]
-#             # E[f̄(x)] est la moyenne des prédictions
-#             expected_prediction = np.mean(all_predictions)
-#             variance = np.mean((all_predictions - expected_prediction)**2)
-            
-#             return {
-#                 'mae': float(np.mean(mae_list)), 
-#                 'mse': float(np.mean(mse_list)),
-#                 'rmse': float(np.mean(rmse_list)),
-#                 'r2': float(np.mean(r2_list)),
-#                 'bias': float(bias),
-#                 'variance': float(variance)
-#             }
-#             # Calculer les métriques pour tous les modèles
-#         metrics = {
-#                 # Métriques pour les modèles à domicile
-#             'home_model_rf': calculate_metrics_kfold(model_home_rf, X, y_home),
-#             'home_model_lr': calculate_metrics_kfold(model_home_lr, X, y_home),
-#             'home_model_ridge': calculate_metrics_kfold(model_home_ridge, X, y_home),
-#             'home_model_lasso': calculate_metrics_kfold(model_home_lasso, X, y_home),
-#             'home_model_gb': calculate_metrics_kfold(model_home_gb, X, y_home),
-#             'home_model_knn': calculate_metrics_kfold(model_home_knn, X, y_home),
-#             'home_model_mlp': calculate_metrics_kfold(model_home_mlp, X, y_home),
-                    
-#                     # Métriques pour les modèles à l'extérieur
-#            'away_model_rf': calculate_metrics_kfold(model_away_rf, X, y_away),
-#             'away_model_lr': calculate_metrics_kfold(model_away_lr, X, y_away),
-#             'away_model_ridge': calculate_metrics_kfold(model_away_ridge, X, y_away),
-#             'away_model_lasso': calculate_metrics_kfold(model_away_lasso, X, y_away),
-#             'away_model_gb': calculate_metrics_kfold(model_away_gb, X, y_away),
-#             'away_model_knn': calculate_metrics_kfold(model_away_knn, X, y_away),
-#             'away_model_mlp': calculate_metrics_kfold(model_away_mlp, X, y_away),
-#         }
-            
-#         return jsonify({'metrics': metrics})
-#     except Exception as e:
-#         return jsonify({
-#             'error': str(e),
-#             'message': 'Erreur lors du calcul des métriques du modèle'
-#         }), 500
 @app.route('/api/model_metrics_kfold')
 def model_metrics_kfold():
     global X, y_home, y_away
@@ -1254,77 +1242,6 @@ def keras_model_metrics():
             "error": str(e),
             "message": "Erreur lors de l'entraînement ou de l'évaluation du modèle Keras"
         }), 500
-# @app.route('/api/correlation_goals_players', methods=['GET'])
-# def correlation_goals_players():
-#     try:
-#         # 1. Sélection des colonnes des joueurs
-#         player_cols = [f'home_player_{i}' for i in range(1, 12)] + [f'away_player_{i}' for i in range(1, 12)]
-
-#         # 2. Garder uniquement les colonnes utiles
-#         relevant_cols = ['match_api_id', 'home_team_goal', 'away_team_goal'] + player_cols
-#         df = match_df[relevant_cols].copy()
-
-#         # 3. Préparer les données de joueurs en "long format"
-#         melted_home = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
-#                               value_vars=[f'home_player_{i}' for i in range(1, 12)],
-#                               var_name='position', value_name='player_api_id')
-#         melted_home['team'] = 'home'
-
-#         melted_away = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
-#                               value_vars=[f'away_player_{i}' for i in range(1, 12)],
-#                               var_name='position', value_name='player_api_id')
-#         melted_away['team'] = 'away'
-
-#         players_long = pd.concat([melted_home, melted_away])
-
-#         # 4. Merge avec les données des attributs joueurs (on prend le dernier attribut connu par joueur)
-#         player_attributes_latest = player_attributes_df.sort_values('date').drop_duplicates('player_api_id', keep='last')
-
-#         players_merged = players_long.merge(player_attributes_latest, on='player_api_id', how='left')
-
-#         # 5. Moyenne des attributs des 11 joueurs par match et par équipe (home vs away)
-#         player_features = player_attributes_latest.select_dtypes(include='number').columns.tolist()
-#         player_features = [feat for feat in player_features if feat not in ['id', 'player_api_id']]
-
-#         team_avg = players_merged.groupby(['match_api_id', 'team'])[player_features].mean().reset_index()
-
-#         # 6. Pivot (home vs away) pour aligner les données avec les buts
-#         home_features = team_avg[team_avg['team'] == 'home'].drop(columns='team').set_index('match_api_id')
-#         away_features = team_avg[team_avg['team'] == 'away'].drop(columns='team').set_index('match_api_id')
-
-#         home_features.columns = [f'home_{col}' for col in home_features.columns]
-#         away_features.columns = [f'away_{col}' for col in away_features.columns]
-
-#         match_features = home_features.join(away_features, how='inner').reset_index()
-
-#         # 7. Ajouter les scores
-#         goals = match_df[['match_api_id', 'home_team_goal', 'away_team_goal']]
-#         final_df = match_features.merge(goals, on='match_api_id')
-
-#         # 8. Matrice de corrélation
-#         corr_matrix = final_df.corr()
-
-#         # 9. Extraction des corrélations spécifiques aux goals
-#         correlations_with_goals = corr_matrix[['home_team_goal', 'away_team_goal']].drop(index=['home_team_goal', 'away_team_goal'])
-#         correlations_sorted = correlations_with_goals.abs().sort_values(by=['home_team_goal', 'away_team_goal'], ascending=False)
-
-
-#         plt.figure(figsize=(10, 12))
-#         sns.heatmap(correlations_sorted, annot=True, cmap='coolwarm', center=0)
-#         plt.title("Corrélation entre les attributs moyens des joueurs et le nombre de buts")
-#         plt.tight_layout()
-
-#         # Convertir en image base64 pour affichage via front
-#         import io, base64
-#         img = io.BytesIO()
-#         plt.savefig(img, format='png')
-#         img.seek(0)
-#         plot_url = base64.b64encode(img.getvalue()).decode()
-
-#         return jsonify({'image': f"data:image/png;base64,{plot_url}"})
-    
-#     except Exception as e:
-#         return jsonify({'error': str(e), 'message': 'Erreur dans la génération de la matrice de corrélation'}), 500
 
 @app.route('/api/correlation_goals_players', methods=['GET'])
 def correlation_goals_players():
