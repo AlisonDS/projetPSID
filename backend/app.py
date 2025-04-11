@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
+from flask import Response
 import json
 from flask_cors import CORS
 import pandas as pd
@@ -1253,6 +1254,195 @@ def keras_model_metrics():
             "error": str(e),
             "message": "Erreur lors de l'entraînement ou de l'évaluation du modèle Keras"
         }), 500
+# @app.route('/api/correlation_goals_players', methods=['GET'])
+# def correlation_goals_players():
+#     try:
+#         # 1. Sélection des colonnes des joueurs
+#         player_cols = [f'home_player_{i}' for i in range(1, 12)] + [f'away_player_{i}' for i in range(1, 12)]
+
+#         # 2. Garder uniquement les colonnes utiles
+#         relevant_cols = ['match_api_id', 'home_team_goal', 'away_team_goal'] + player_cols
+#         df = match_df[relevant_cols].copy()
+
+#         # 3. Préparer les données de joueurs en "long format"
+#         melted_home = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
+#                               value_vars=[f'home_player_{i}' for i in range(1, 12)],
+#                               var_name='position', value_name='player_api_id')
+#         melted_home['team'] = 'home'
+
+#         melted_away = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
+#                               value_vars=[f'away_player_{i}' for i in range(1, 12)],
+#                               var_name='position', value_name='player_api_id')
+#         melted_away['team'] = 'away'
+
+#         players_long = pd.concat([melted_home, melted_away])
+
+#         # 4. Merge avec les données des attributs joueurs (on prend le dernier attribut connu par joueur)
+#         player_attributes_latest = player_attributes_df.sort_values('date').drop_duplicates('player_api_id', keep='last')
+
+#         players_merged = players_long.merge(player_attributes_latest, on='player_api_id', how='left')
+
+#         # 5. Moyenne des attributs des 11 joueurs par match et par équipe (home vs away)
+#         player_features = player_attributes_latest.select_dtypes(include='number').columns.tolist()
+#         player_features = [feat for feat in player_features if feat not in ['id', 'player_api_id']]
+
+#         team_avg = players_merged.groupby(['match_api_id', 'team'])[player_features].mean().reset_index()
+
+#         # 6. Pivot (home vs away) pour aligner les données avec les buts
+#         home_features = team_avg[team_avg['team'] == 'home'].drop(columns='team').set_index('match_api_id')
+#         away_features = team_avg[team_avg['team'] == 'away'].drop(columns='team').set_index('match_api_id')
+
+#         home_features.columns = [f'home_{col}' for col in home_features.columns]
+#         away_features.columns = [f'away_{col}' for col in away_features.columns]
+
+#         match_features = home_features.join(away_features, how='inner').reset_index()
+
+#         # 7. Ajouter les scores
+#         goals = match_df[['match_api_id', 'home_team_goal', 'away_team_goal']]
+#         final_df = match_features.merge(goals, on='match_api_id')
+
+#         # 8. Matrice de corrélation
+#         corr_matrix = final_df.corr()
+
+#         # 9. Extraction des corrélations spécifiques aux goals
+#         correlations_with_goals = corr_matrix[['home_team_goal', 'away_team_goal']].drop(index=['home_team_goal', 'away_team_goal'])
+#         correlations_sorted = correlations_with_goals.abs().sort_values(by=['home_team_goal', 'away_team_goal'], ascending=False)
+
+
+#         plt.figure(figsize=(10, 12))
+#         sns.heatmap(correlations_sorted, annot=True, cmap='coolwarm', center=0)
+#         plt.title("Corrélation entre les attributs moyens des joueurs et le nombre de buts")
+#         plt.tight_layout()
+
+#         # Convertir en image base64 pour affichage via front
+#         import io, base64
+#         img = io.BytesIO()
+#         plt.savefig(img, format='png')
+#         img.seek(0)
+#         plot_url = base64.b64encode(img.getvalue()).decode()
+
+#         return jsonify({'image': f"data:image/png;base64,{plot_url}"})
+    
+#     except Exception as e:
+#         return jsonify({'error': str(e), 'message': 'Erreur dans la génération de la matrice de corrélation'}), 500
+
+@app.route('/api/correlation_goals_players', methods=['GET'])
+def correlation_goals_players():
+    try:
+        # 1. Sélection des colonnes des joueurs
+        player_cols = [f'home_player_{i}' for i in range(1, 12)] + [f'away_player_{i}' for i in range(1, 12)]
+
+        # 2. Garder uniquement les colonnes utiles
+        relevant_cols = ['match_api_id', 'home_team_goal', 'away_team_goal'] + player_cols
+        df = match_df[relevant_cols].copy()
+
+        # 3. Préparer les données des joueurs en format long
+        melted_home = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
+                              value_vars=[f'home_player_{i}' for i in range(1, 12)],
+                              var_name='position', value_name='player_api_id')
+        melted_home['team'] = 'home'
+
+        melted_away = df.melt(id_vars=['match_api_id', 'home_team_goal', 'away_team_goal'], 
+                              value_vars=[f'away_player_{i}' for i in range(1, 12)],
+                              var_name='position', value_name='player_api_id')
+        melted_away['team'] = 'away'
+
+        players_long = pd.concat([melted_home, melted_away])
+
+        # 4. Derniers attributs des joueurs
+        player_attributes_latest = player_attributes_df.sort_values('date').drop_duplicates('player_api_id', keep='last')
+
+        # 5. Fusion avec les attributs
+        players_merged = players_long.merge(player_attributes_latest, on='player_api_id', how='left')
+
+        # 6. Moyenne des attributs par équipe
+        player_features = player_attributes_latest.select_dtypes(include='number').columns.tolist()
+        player_features = [feat for feat in player_features if feat not in ['id', 'player_api_id']]
+
+        team_avg = players_merged.groupby(['match_api_id', 'team'])[player_features].mean().reset_index()
+
+        # 7. Pivot pour avoir home_*, away_*
+        home_features = team_avg[team_avg['team'] == 'home'].drop(columns='team').set_index('match_api_id')
+        away_features = team_avg[team_avg['team'] == 'away'].drop(columns='team').set_index('match_api_id')
+
+        home_features.columns = [f'home_{col}' for col in home_features.columns]
+        away_features.columns = [f'away_{col}' for col in away_features.columns]
+
+        match_features = home_features.join(away_features, how='inner').reset_index()
+
+        # 8. Ajouter les scores
+        goals = match_df[['match_api_id', 'home_team_goal', 'away_team_goal']]
+        final_df = match_features.merge(goals, on='match_api_id')
+
+        # 9. Matrice de corrélation
+        corr_matrix = final_df.corr()
+
+        # 10. Corrélations avec les buts
+        correlations_with_goals = corr_matrix[['home_team_goal', 'away_team_goal']].drop(index=['home_team_goal', 'away_team_goal'])
+        correlations_sorted = correlations_with_goals.abs().sort_values(by=['home_team_goal', 'away_team_goal'], ascending=False)
+
+        # 11. Plot
+     
+
+        plt.figure(figsize=(10, 12))
+        sns.heatmap(correlations_sorted, annot=True, cmap='coolwarm', center=0)
+        plt.title("Corrélation entre les attributs moyens des joueurs et le nombre de buts")
+        plt.tight_layout()
+
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        img.seek(0)
+        plt.close()
+
+        return Response(img.getvalue(), mimetype='image/png')
+
+    except Exception as e:
+        return jsonify({'error': str(e), 'message': 'Erreur dans la génération de la matrice de corrélation'}), 500
+
+@app.route('/api/correlation_goals_teams', methods=['GET'])
+def correlation_goals_teams():
+    try:
+        # 1. Trier les données de team_attributes par date et garder les derniers enregistrements
+        latest_team_attrs = team_attributes_df.sort_values('date').drop_duplicates('team_api_id', keep='last')
+
+        # 2. Merge avec match_df pour home team
+        home_team = match_df[['match_api_id', 'home_team_api_id', 'home_team_goal']].rename(columns={'home_team_api_id': 'team_api_id'})
+        home_merged = home_team.merge(latest_team_attrs, on='team_api_id', how='left')
+        home_merged = home_merged.add_prefix('home_')
+        home_merged.rename(columns={'home_match_api_id': 'match_api_id'}, inplace=True)
+
+        # 3. Merge avec match_df pour away team
+        away_team = match_df[['match_api_id', 'away_team_api_id', 'away_team_goal']].rename(columns={'away_team_api_id': 'team_api_id'})
+        away_merged = away_team.merge(latest_team_attrs, on='team_api_id', how='left')
+        away_merged = away_merged.add_prefix('away_')
+        away_merged.rename(columns={'away_match_api_id': 'match_api_id'}, inplace=True)
+
+        # 4. Merge les deux tables sur match_api_id
+        team_features = pd.merge(home_merged, away_merged, on='match_api_id', how='inner')
+
+        # 5. Calculer la matrice de corrélation
+        corr_matrix = team_features.select_dtypes(include='number').corr()
+
+        # 6. Extraire uniquement les corrélations avec home_team_goal et away_team_goal
+        correlations_with_goals = corr_matrix[['home_home_team_goal', 'away_away_team_goal']].drop(index=['home_home_team_goal', 'away_away_team_goal'])
+        correlations_sorted = correlations_with_goals.abs().sort_values(by=['home_home_team_goal', 'away_away_team_goal'], ascending=False)
+
+        # 7. Visualiser en heatmap
+        plt.figure(figsize=(10, 12))
+        sns.heatmap(correlations_sorted, annot=True, cmap='coolwarm', center=0)
+        plt.title("Corrélation entre les attributs d'équipe et les buts marqués")
+        plt.tight_layout()
+
+        # 8. Retourner l'image directement
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        plt.close()  # Pour éviter que la figure reste en mémoire
+        img.seek(0)
+        return send_file(img, mimetype='image/png')
+
+    except Exception as e:
+        return f"Erreur : {str(e)}", 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
