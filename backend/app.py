@@ -741,6 +741,7 @@ away_scores = []
 
 # Filtrer les matchs pour ne garder que ceux de la saison 2013/2014 à 2015/2016
 match_df = match_df[match_df['season'].isin(['2013/2014', '2014/2015', '2015/2016'])]
+# match_df = match_df[match_df['season'] == '2015/2016']
 
 for idx, match in match_df.iterrows():
     home_team_id = match['home_team_api_id']
